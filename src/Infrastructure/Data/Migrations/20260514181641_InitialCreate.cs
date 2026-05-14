@@ -12,78 +12,6 @@ namespace TPI_2026.Infrastructure.Data.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Administrators",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", nullable: false),
-                    Email = table.Column<string>(type: "TEXT", nullable: false),
-                    Password = table.Column<string>(type: "TEXT", nullable: false),
-                    Role = table.Column<int>(type: "INTEGER", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Administrators", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Doctors",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Credential = table.Column<string>(type: "TEXT", nullable: false),
-                    Specialty = table.Column<int>(type: "INTEGER", nullable: false),
-                    Disponible = table.Column<bool>(type: "INTEGER", nullable: false),
-                    Appointments = table.Column<string>(type: "TEXT", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", nullable: false),
-                    Email = table.Column<string>(type: "TEXT", nullable: false),
-                    Password = table.Column<string>(type: "TEXT", nullable: false),
-                    Role = table.Column<int>(type: "INTEGER", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Doctors", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Patients",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Dni = table.Column<string>(type: "TEXT", nullable: false),
-                    BirthDate = table.Column<string>(type: "TEXT", nullable: false),
-                    PhoneNumber = table.Column<string>(type: "TEXT", nullable: false),
-                    Adress = table.Column<string>(type: "TEXT", nullable: false),
-                    Appointments = table.Column<string>(type: "TEXT", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", nullable: false),
-                    Email = table.Column<string>(type: "TEXT", nullable: false),
-                    Password = table.Column<string>(type: "TEXT", nullable: false),
-                    Role = table.Column<int>(type: "INTEGER", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Patients", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Recepcionists",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    EmployeeNumber = table.Column<string>(type: "TEXT", nullable: false),
-                    Shift = table.Column<string>(type: "TEXT", nullable: false),
-                    Sector = table.Column<string>(type: "TEXT", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", nullable: false),
-                    Email = table.Column<string>(type: "TEXT", nullable: false),
-                    Password = table.Column<string>(type: "TEXT", nullable: false),
-                    Role = table.Column<int>(type: "INTEGER", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Recepcionists", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "TodoLists",
                 columns: table => new
                 {
@@ -101,23 +29,30 @@ namespace TPI_2026.Infrastructure.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Rooms",
+                name: "Users",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Number = table.Column<string>(type: "TEXT", nullable: false),
-                    Floor = table.Column<int>(type: "INTEGER", nullable: false),
-                    Specialty = table.Column<int>(type: "INTEGER", nullable: false),
-                    DoctorId = table.Column<Guid>(type: "TEXT", nullable: true)
+                    Name = table.Column<string>(type: "TEXT", maxLength: 150, nullable: false),
+                    Email = table.Column<string>(type: "TEXT", maxLength: 200, nullable: false),
+                    Password = table.Column<string>(type: "TEXT", nullable: false),
+                    Role = table.Column<string>(type: "TEXT", nullable: false),
+                    UserType = table.Column<string>(type: "TEXT", maxLength: 13, nullable: false),
+                    Credential = table.Column<string>(type: "TEXT", nullable: true),
+                    Specialty = table.Column<int>(type: "INTEGER", nullable: true),
+                    Disponible = table.Column<bool>(type: "INTEGER", nullable: true),
+                    Appointments = table.Column<string>(type: "TEXT", nullable: true),
+                    Dni = table.Column<string>(type: "TEXT", maxLength: 8, nullable: true),
+                    BirthDate = table.Column<string>(type: "TEXT", nullable: true),
+                    PhoneNumber = table.Column<string>(type: "TEXT", maxLength: 30, nullable: true),
+                    Adress = table.Column<string>(type: "TEXT", nullable: true),
+                    EmployeeNumber = table.Column<string>(type: "TEXT", nullable: true),
+                    Shift = table.Column<string>(type: "TEXT", nullable: true),
+                    Sector = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Rooms", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Rooms_Doctors_DoctorId",
-                        column: x => x.DoctorId,
-                        principalTable: "Doctors",
-                        principalColumn: "Id");
+                    table.PrimaryKey("PK_Users", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -147,7 +82,27 @@ namespace TPI_2026.Infrastructure.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Appoiments",
+                name: "Rooms",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Number = table.Column<string>(type: "TEXT", nullable: false),
+                    Floor = table.Column<int>(type: "INTEGER", nullable: false),
+                    Specialty = table.Column<int>(type: "INTEGER", nullable: false),
+                    DoctorId = table.Column<Guid>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Rooms", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Rooms_Users_DoctorId",
+                        column: x => x.DoctorId,
+                        principalTable: "Users",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Appointments",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
@@ -155,29 +110,29 @@ namespace TPI_2026.Infrastructure.Data.Migrations
                     DoctorId = table.Column<Guid>(type: "TEXT", nullable: false),
                     RoomId = table.Column<Guid>(type: "TEXT", nullable: false),
                     DateTime = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    State = table.Column<int>(type: "INTEGER", nullable: false)
+                    State = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Appoiments", x => x.Id);
+                    table.PrimaryKey("PK_Appointments", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Appoiments_Doctors_DoctorId",
-                        column: x => x.DoctorId,
-                        principalTable: "Doctors",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Appoiments_Patients_PatientId",
-                        column: x => x.PatientId,
-                        principalTable: "Patients",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Appoiments_Rooms_RoomId",
+                        name: "FK_Appointments_Rooms_RoomId",
                         column: x => x.RoomId,
                         principalTable: "Rooms",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Appointments_Users_DoctorId",
+                        column: x => x.DoctorId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Appointments_Users_PatientId",
+                        column: x => x.PatientId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -187,39 +142,39 @@ namespace TPI_2026.Infrastructure.Data.Migrations
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     AppointmentId = table.Column<Guid>(type: "TEXT", nullable: false),
                     PatientId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Diagnostic = table.Column<string>(type: "TEXT", nullable: false),
+                    Diagnostic = table.Column<string>(type: "TEXT", maxLength: 2000, nullable: false),
                     DateTime = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_MedicalHistories", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_MedicalHistories_Appoiments_AppointmentId",
+                        name: "FK_MedicalHistories_Appointments_AppointmentId",
                         column: x => x.AppointmentId,
-                        principalTable: "Appoiments",
+                        principalTable: "Appointments",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_MedicalHistories_Patients_PatientId",
+                        name: "FK_MedicalHistories_Users_PatientId",
                         column: x => x.PatientId,
-                        principalTable: "Patients",
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Appoiments_DoctorId",
-                table: "Appoiments",
+                name: "IX_Appointments_DoctorId",
+                table: "Appointments",
                 column: "DoctorId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Appoiments_PatientId",
-                table: "Appoiments",
+                name: "IX_Appointments_PatientId",
+                table: "Appointments",
                 column: "PatientId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Appoiments_RoomId",
-                table: "Appoiments",
+                name: "IX_Appointments_RoomId",
+                table: "Appointments",
                 column: "RoomId");
 
             migrationBuilder.CreateIndex(
@@ -242,37 +197,40 @@ namespace TPI_2026.Infrastructure.Data.Migrations
                 name: "IX_TodoItems_ListId",
                 table: "TodoItems",
                 column: "ListId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_Dni",
+                table: "Users",
+                column: "Dni",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_Email",
+                table: "Users",
+                column: "Email",
+                unique: true);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Administrators");
-
-            migrationBuilder.DropTable(
                 name: "MedicalHistories");
-
-            migrationBuilder.DropTable(
-                name: "Recepcionists");
 
             migrationBuilder.DropTable(
                 name: "TodoItems");
 
             migrationBuilder.DropTable(
-                name: "Appoiments");
+                name: "Appointments");
 
             migrationBuilder.DropTable(
                 name: "TodoLists");
 
             migrationBuilder.DropTable(
-                name: "Patients");
-
-            migrationBuilder.DropTable(
                 name: "Rooms");
 
             migrationBuilder.DropTable(
-                name: "Doctors");
+                name: "Users");
         }
     }
 }

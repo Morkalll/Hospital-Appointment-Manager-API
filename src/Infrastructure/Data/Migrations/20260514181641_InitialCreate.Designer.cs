@@ -11,7 +11,7 @@ using TPI_2026.Infrastructure.Data;
 namespace TPI_2026.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260424024926_InitialCreate")]
+    [Migration("20260514181641_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -19,32 +19,6 @@ namespace TPI_2026.Infrastructure.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.6");
-
-            modelBuilder.Entity("TPI_2026.Domain.Entities.Administrator", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Password")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("Role")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Administrators");
-                });
 
             modelBuilder.Entity("TPI_2026.Domain.Entities.Appointment", b =>
                 {
@@ -64,8 +38,9 @@ namespace TPI_2026.Infrastructure.Data.Migrations
                     b.Property<Guid>("RoomId")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("State")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("State")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -75,47 +50,7 @@ namespace TPI_2026.Infrastructure.Data.Migrations
 
                     b.HasIndex("RoomId");
 
-                    b.ToTable("Appoiments");
-                });
-
-            modelBuilder.Entity("TPI_2026.Domain.Entities.Doctor", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.PrimitiveCollection<string>("Appointments")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Credential")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("Disponible")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Password")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("Role")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Specialty")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Doctors");
+                    b.ToTable("Appointments", (string)null);
                 });
 
             modelBuilder.Entity("TPI_2026.Domain.Entities.MedicalHistory", b =>
@@ -132,6 +67,7 @@ namespace TPI_2026.Infrastructure.Data.Migrations
 
                     b.Property<string>("Diagnostic")
                         .IsRequired()
+                        .HasMaxLength(2000)
                         .HasColumnType("TEXT");
 
                     b.Property<Guid>("PatientId")
@@ -144,91 +80,7 @@ namespace TPI_2026.Infrastructure.Data.Migrations
 
                     b.HasIndex("PatientId");
 
-                    b.ToTable("MedicalHistories");
-                });
-
-            modelBuilder.Entity("TPI_2026.Domain.Entities.Patient", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Adress")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.PrimitiveCollection<string>("Appointments")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("BirthDate")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Dni")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Password")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("PhoneNumber")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("Role")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Patients");
-                });
-
-            modelBuilder.Entity("TPI_2026.Domain.Entities.Recepcionist", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("EmployeeNumber")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Password")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("Role")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Sector")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Shift")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Recepcionists");
+                    b.ToTable("MedicalHistories", (string)null);
                 });
 
             modelBuilder.Entity("TPI_2026.Domain.Entities.Room", b =>
@@ -327,6 +179,122 @@ namespace TPI_2026.Infrastructure.Data.Migrations
                     b.ToTable("TodoLists");
                 });
 
+            modelBuilder.Entity("TPI_2026.Domain.Entities.User", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UserType")
+                        .IsRequired()
+                        .HasMaxLength(13)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.ToTable("Users", (string)null);
+
+                    b.HasDiscriminator<string>("UserType").HasValue("User");
+
+                    b.UseTphMappingStrategy();
+                });
+
+            modelBuilder.Entity("TPI_2026.Domain.Entities.Administrator", b =>
+                {
+                    b.HasBaseType("TPI_2026.Domain.Entities.User");
+
+                    b.HasDiscriminator().HasValue("Administrator");
+                });
+
+            modelBuilder.Entity("TPI_2026.Domain.Entities.Doctor", b =>
+                {
+                    b.HasBaseType("TPI_2026.Domain.Entities.User");
+
+                    b.PrimitiveCollection<string>("Appointments")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Credential")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("Disponible")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Specialty")
+                        .HasColumnType("INTEGER");
+
+                    b.HasDiscriminator().HasValue("Doctor");
+                });
+
+            modelBuilder.Entity("TPI_2026.Domain.Entities.Patient", b =>
+                {
+                    b.HasBaseType("TPI_2026.Domain.Entities.User");
+
+                    b.Property<string>("Adress")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("BirthDate")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Dni")
+                        .IsRequired()
+                        .HasMaxLength(8)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("TEXT");
+
+                    b.HasIndex("Dni")
+                        .IsUnique();
+
+                    b.HasDiscriminator().HasValue("Patient");
+                });
+
+            modelBuilder.Entity("TPI_2026.Domain.Entities.Recepcionist", b =>
+                {
+                    b.HasBaseType("TPI_2026.Domain.Entities.User");
+
+                    b.Property<string>("EmployeeNumber")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Sector")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Shift")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasDiscriminator().HasValue("Recepcionist");
+                });
+
             modelBuilder.Entity("TPI_2026.Domain.Entities.Appointment", b =>
                 {
                     b.HasOne("TPI_2026.Domain.Entities.Doctor", "Doctor")
@@ -335,23 +303,23 @@ namespace TPI_2026.Infrastructure.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TPI_2026.Domain.Entities.Patient", "Paciente")
-                        .WithMany()
+                    b.HasOne("TPI_2026.Domain.Entities.Patient", "Patient")
+                        .WithMany("Appointments")
                         .HasForeignKey("PatientId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("TPI_2026.Domain.Entities.Room", "Consultorio")
+                    b.HasOne("TPI_2026.Domain.Entities.Room", "Room")
                         .WithMany("Appointments")
                         .HasForeignKey("RoomId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Consultorio");
-
                     b.Navigation("Doctor");
 
-                    b.Navigation("Paciente");
+                    b.Navigation("Patient");
+
+                    b.Navigation("Room");
                 });
 
             modelBuilder.Entity("TPI_2026.Domain.Entities.MedicalHistory", b =>
@@ -363,7 +331,7 @@ namespace TPI_2026.Infrastructure.Data.Migrations
                         .IsRequired();
 
                     b.HasOne("TPI_2026.Domain.Entities.Patient", "Patient")
-                        .WithMany("Histories")
+                        .WithMany("MedicalHistories")
                         .HasForeignKey("PatientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -421,16 +389,6 @@ namespace TPI_2026.Infrastructure.Data.Migrations
                     b.Navigation("MedicalHistory");
                 });
 
-            modelBuilder.Entity("TPI_2026.Domain.Entities.Doctor", b =>
-                {
-                    b.Navigation("Rooms");
-                });
-
-            modelBuilder.Entity("TPI_2026.Domain.Entities.Patient", b =>
-                {
-                    b.Navigation("Histories");
-                });
-
             modelBuilder.Entity("TPI_2026.Domain.Entities.Room", b =>
                 {
                     b.Navigation("Appointments");
@@ -439,6 +397,18 @@ namespace TPI_2026.Infrastructure.Data.Migrations
             modelBuilder.Entity("TPI_2026.Domain.Entities.TodoList", b =>
                 {
                     b.Navigation("Items");
+                });
+
+            modelBuilder.Entity("TPI_2026.Domain.Entities.Doctor", b =>
+                {
+                    b.Navigation("Rooms");
+                });
+
+            modelBuilder.Entity("TPI_2026.Domain.Entities.Patient", b =>
+                {
+                    b.Navigation("Appointments");
+
+                    b.Navigation("MedicalHistories");
                 });
 #pragma warning restore 612, 618
         }
