@@ -13,7 +13,7 @@ public class Doctor : User
 
     //Cardinalidades
     public ICollection<Room> Rooms { get; private set; } = [];
-    public ICollection<AppointmentState> Appointments { get; private set; } = [];
+    public ICollection<Appointment> Appointments { get; private set; } = [];
 
     public Doctor() { Role = UserRole.Doctor; }
 }

@@ -1,5 +1,4 @@
-﻿global using TPI_2026.Web.AcceptanceTests.Pages;
-global using TPI_2026.Shared;
+﻿global using TPI_2026.Shared;
 global using Microsoft.Playwright;
 global using Reqnroll;
 global using Reqnroll.BoDi;
