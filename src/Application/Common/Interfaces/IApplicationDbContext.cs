@@ -11,8 +11,6 @@ public interface IApplicationDbContext
     DbSet<Room> Rooms { get; }
     DbSet<Appointment> Appointments { get; }
     DbSet<MedicalHistory> MedicalHistories { get; }
-    DbSet<TodoList> TodoLists { get; }
-    DbSet<TodoItem> TodoItems { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

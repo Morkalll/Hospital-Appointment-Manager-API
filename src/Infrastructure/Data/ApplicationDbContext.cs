@@ -17,8 +17,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Room> Rooms => Set<Room>();
     public DbSet<Appointment> Appointments => Set<Appointment>();
     public DbSet<MedicalHistory> MedicalHistories => Set<MedicalHistory>();
-    public DbSet<TodoList> TodoLists => Set<TodoList>();
-    public DbSet<TodoItem> TodoItems => Set<TodoItem>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -26,7 +24,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
         builder.Ignore<Domain.Common.BaseEvent>();
 
-        
+
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
     }
 
