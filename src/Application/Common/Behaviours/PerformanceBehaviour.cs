@@ -1,5 +1,5 @@
 ﻿using System.Diagnostics;
-using TPI_2026.Application.Common.Interfaces;
+using TPI_2026.Application.Abstractions.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace TPI_2026.Application.Common.Behaviours;

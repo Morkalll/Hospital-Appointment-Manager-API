@@ -1,7 +1,7 @@
-﻿using TPI_2026.Application.Common.Interfaces;
+﻿using TPI_2026.Application.Abstractions.Interfaces;
 using TPI_2026.Domain.Entities;
-using TPI_2026.Infrastructure.Data;
-using TPI_2026.Infrastructure.Identity;
+using TPI_2026.Infrastructure.Persistance;
+using TPI_2026.Infrastructure.ExternalServices;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;

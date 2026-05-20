@@ -1,6 +1,6 @@
 ﻿using System.Security.Claims;
 
-using TPI_2026.Application.Common.Interfaces;
+using TPI_2026.Application.Abstractions.Interfaces;
 
 namespace TPI_2026.Web.Services;
 

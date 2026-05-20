@@ -1,11 +1,11 @@
 ﻿using System.Reflection;
-using TPI_2026.Application.Common.Exceptions;
-using TPI_2026.Application.Common.Interfaces;
+using TPI_2026.Application.Exceptions;
+using TPI_2026.Application.Abstractions.Interfaces;
 using TPI_2026.Application.Common.Security;
 
 namespace TPI_2026.Application.Common.Behaviours;
 
-public class AuthorizationBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse> 
+public class AuthorizationBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull
 {
     private readonly IUser _user;
@@ -42,7 +42,7 @@ public class AuthorizationBehaviour<TRequest, TResponse> : IPipelineBehavior<TRe
                 {
                     foreach (var role in roles)
                     {
-                        var isInRole = _user.Roles?.Any(x => role == x)??false;
+                        var isInRole = _user.Roles?.Any(x => role == x) ?? false;
                         if (isInRole)
                         {
                             authorized = true;

@@ -1,4 +1,4 @@
-using TPI_2026.Infrastructure.Data;
+using TPI_2026.Infrastructure.Persistance;
 
 namespace TPI_2026.Web.Infrastructure;
 

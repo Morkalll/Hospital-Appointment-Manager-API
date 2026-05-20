@@ -1,4 +1,4 @@
-﻿using TPI_2026.Application.Common.Interfaces;
+﻿using TPI_2026.Application.Abstractions.Interfaces;
 using MediatR.Pipeline;
 using Microsoft.Extensions.Logging;
 

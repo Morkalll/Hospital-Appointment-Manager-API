@@ -1,5 +1,5 @@
 using TPI_2026.Infrastructure;
-using TPI_2026.Infrastructure.Data;
+using TPI_2026.Infrastructure.Persistance;
 using TPI_2026.Web.Infrastructure;
 using Scalar.AspNetCore;
 
