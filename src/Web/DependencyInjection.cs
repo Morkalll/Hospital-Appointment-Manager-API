@@ -1,6 +1,6 @@
 using Azure.Identity;
-using TPI_2026.Application.Common.Interfaces;
-using TPI_2026.Infrastructure.Data;
+using TPI_2026.Application.Abstractions.Interfaces;
+using TPI_2026.Infrastructure.Persistance;
 using TPI_2026.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 

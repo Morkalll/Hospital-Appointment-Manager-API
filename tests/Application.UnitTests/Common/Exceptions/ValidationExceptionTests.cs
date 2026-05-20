@@ -1,4 +1,4 @@
-﻿using TPI_2026.Application.Common.Exceptions;
+﻿using TPI_2026.Application.Exceptions;
 using FluentValidation.Results;
 using NUnit.Framework;
 using Shouldly;

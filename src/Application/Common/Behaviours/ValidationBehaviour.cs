@@ -1,4 +1,4 @@
-﻿using ValidationException = TPI_2026.Application.Common.Exceptions.ValidationException;
+﻿using ValidationException = TPI_2026.Application.Exceptions.ValidationException;
 
 namespace TPI_2026.Application.Common.Behaviours;
 

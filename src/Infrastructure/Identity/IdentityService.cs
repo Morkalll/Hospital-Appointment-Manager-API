@@ -1,5 +1,6 @@
-using TPI_2026.Application.Common.Interfaces;
+using TPI_2026.Application.Abstractions.Interfaces;
 using TPI_2026.Application.Common.Models;
+using TPI_2026.Infrastructure.ExternalServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;

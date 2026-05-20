@@ -1,4 +1,4 @@
-using TPI_2026.Application.Common.Exceptions;
+using TPI_2026.Application.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
