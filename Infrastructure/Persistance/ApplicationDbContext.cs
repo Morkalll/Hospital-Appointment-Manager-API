@@ -27,7 +27,7 @@ public class ApplicationDbContext : DbContext
 
         modelBuilder.Ignore<BaseEvent>(); // Esto es para que no cree una tabla de eventos en la base de datos
 
-        
+
         modelBuilder.Entity<User>()
             .HasDiscriminator<string>("UserType")
             .HasValue<Patient>("Patient")

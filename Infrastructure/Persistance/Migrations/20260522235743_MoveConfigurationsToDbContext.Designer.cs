@@ -8,7 +8,7 @@ using TPI_2026.Infrastructure.Persistance;
 
 #nullable disable
 
-namespace TPI_2026.Infrastructure.Migrations
+namespace TPI_2026.Infrastructure.Persistance.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     [Migration("20260522235743_MoveConfigurationsToDbContext")]

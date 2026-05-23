@@ -14,6 +14,5 @@ public interface IApplicationDbContext
     DbSet<Room> Rooms { get; }
     DbSet<Appointment> Appointments { get; }
     DbSet<MedicalHistory> MedicalHistories { get; }
-
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

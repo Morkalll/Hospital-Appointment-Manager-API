@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace TPI_2026.Infrastructure.Migrations
+namespace TPI_2026.Infrastructure.Persistance.Migrations
 {
     /// <inheritdoc />
     public partial class MoveConfigurationsToDbContext : Migration
