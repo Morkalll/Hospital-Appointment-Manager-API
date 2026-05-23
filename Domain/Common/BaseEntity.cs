@@ -20,4 +20,11 @@ public abstract class BaseEntity
     public void RemoveDomainEvent(BaseEvent e) => _domainEvents.Remove(e);
     public void ClearDomainEvents() => _domainEvents.Clear();
 
-}
+    // IsDeleted para manejar borrado logico, y lo demas para 
+    // manejar fechas y tiempos de create, update y delete
+    public bool IsDeleted {get; set;}
+    public DateTime CreatedAt {get; set;}
+    public DateTime UpdatedAt {get; set;}
+    public DateTime DeletedAt {get; set;}
+   
+}  
