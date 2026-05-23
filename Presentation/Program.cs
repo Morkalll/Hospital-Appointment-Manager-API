@@ -1,3 +1,4 @@
+using TPI_2026.Application;
 using TPI_2026.Infrastructure;
 using TPI_2026.Infrastructure.Persistance;
 using TPI_2026.Presentation.Infrastructure;
@@ -9,9 +10,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.AddServiceDefaults();
 
 builder.AddKeyVaultIfConfigured();
-builder.AddApplicationServices();
-builder.AddInfrastructureServices();
-builder.AddPresentationServices();
+builder.Services.AddApplicationServices();
+builder.Services.AddInfrastructureServices(builder.Configuration);
+builder.Services.AddPresentationServices();
 builder.Services.AddControllers();
 
 var app = builder.Build();
