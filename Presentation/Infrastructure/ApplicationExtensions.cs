@@ -36,7 +36,7 @@ public static class ApplicationExtensions
             options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=app.db"));
 
         builder.Services.AddScoped<ApplicationDbContextInitialiser>();
-        builder.Services.AddScoped<IApplicationDbContext, ApplicationDbContext>();
+        // Registrar la interfaz IApplicationDbContext si la usamos, la saque porque no corria.
 
         return builder;
     }

@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using TPI_2026.Domain.Entities;
 
+
+// Este interfaz lo dejo por las dudas pero no creo que lo usemos
 namespace TPI_2026.Application.Abstractions.Interfaces;
 
 public interface IApplicationDbContext
