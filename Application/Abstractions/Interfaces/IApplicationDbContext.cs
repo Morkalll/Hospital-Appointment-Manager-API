@@ -9,7 +9,7 @@ public interface IApplicationDbContext
 {
     DbSet<Patient> Patients { get; }
     DbSet<Doctor> Doctors { get; }
-    DbSet<Recepcionist> Recepcionists { get; }
+    DbSet<Receptionist> Receptionists { get; }
     DbSet<Administrator> Administrators { get; }
     DbSet<Room> Rooms { get; }
     DbSet<Appointment> Appointments { get; }

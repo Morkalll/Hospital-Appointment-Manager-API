@@ -15,7 +15,7 @@ public class ApplicationDbContext : DbContext
     // Cada DbSet representa una tabla en la base de datos
     public DbSet<Patient> Patients { get; set; }
     public DbSet<Doctor> Doctors { get; set; }
-    public DbSet<Recepcionist> Recepcionists { get; set; }
+    public DbSet<Receptionist> Receptionists { get; set; }
     public DbSet<Administrator> Administrators { get; set; }
     public DbSet<Room> Rooms { get; set; }
     public DbSet<Appointment> Appointments { get; set; }
@@ -32,7 +32,7 @@ public class ApplicationDbContext : DbContext
             .HasDiscriminator<string>("UserType")
             .HasValue<Patient>("Patient")
             .HasValue<Doctor>("Doctor")
-            .HasValue<Recepcionist>("Recepcionist")
+            .HasValue<Receptionist>("Receptionist")
             .HasValue<Administrator>("Administrator");
 
         // el rol de usuario se guarda como string
