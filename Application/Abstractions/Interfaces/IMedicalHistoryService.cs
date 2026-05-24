@@ -9,7 +9,7 @@ public interface IMedicalHistoryService
         string diagnostic,
         CancellationToken ct = default);
 
-    Task<List<MedicalHistoryDto>> GetByPatientAsync(
+    Task<List<MedicalHistoryDto>> GetPatientByIdAsync(
         Guid patientId,
         CancellationToken ct = default);
 }
