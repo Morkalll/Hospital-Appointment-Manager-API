@@ -8,7 +8,7 @@ using TPI_2026.Domain.Exceptions;
 
 namespace TPI_2026.Application.Services;
 
-public class AppointmentService(IApplicationDbContext dataBase) : IAppointmentService
+public class AppointmentService(IApplicationDbContext database) : IAppointmentService
 {
     public async Task<Guid> CreateAsync(Guid patientId, Guid doctorId, Guid roomId, DateTime dateTime, CancellationToken cancellationToken = default)
     {
@@ -17,20 +17,20 @@ public class AppointmentService(IApplicationDbContext dataBase) : IAppointmentSe
         if (roomId == Guid.Empty) throw new ForbiddenException("RoomId is required.");
         if (dateTime <= DateTime.UtcNow) throw new ForbiddenException("Appointment date must be in the future.");
 
-        var doctor = await dataBase.Doctors.FirstOrDefaultAsync(doctor => doctor.Id == doctorId, cancellationToken)
+        var doctor = await database.Doctors.FirstOrDefaultAsync(doctor => doctor.Id == doctorId, cancellationToken)
             ?? throw new NotFoundException(nameof(Doctor), doctorId);
 
         if (!doctor.IsAvailable)
             throw new ForbiddenException("The doctor is not available.");
 
-        _ = await dataBase.Patients.FirstOrDefaultAsync(patient => patient.Id == patientId, cancellationToken)
+        _ = await database.Patients.FirstOrDefaultAsync(patient => patient.Id == patientId, cancellationToken)
             ?? throw new NotFoundException(nameof(Patient), patientId);
 
-        _ = await dataBase.Rooms.FirstOrDefaultAsync(room => room.Id == roomId, cancellationToken)
+        _ = await database.Rooms.FirstOrDefaultAsync(room => room.Id == roomId, cancellationToken)
             ?? throw new NotFoundException(nameof(Room), roomId);
 
         // Validación de si hay solapamiento de horarios con turnos ya existentes.
-        var overlaps = await dataBase.Appointments.AnyAsync(appointment =>
+        var overlaps = await database.Appointments.AnyAsync(appointment =>
             appointment.DoctorId == doctorId
             && appointment.DateTime == dateTime
             && appointment.State != AppointmentState.CanceledByDoctor
@@ -40,14 +40,14 @@ public class AppointmentService(IApplicationDbContext dataBase) : IAppointmentSe
             throw new ForbiddenException("The doctor already has an appointment at that time.");
 
         var appointment = Appointment.Create(patientId, doctorId, roomId, dateTime);
-        dataBase.Appointments.Add(appointment);
-        await dataBase.SaveChangesAsync(cancellationToken);
+        database.Appointments.Add(appointment);
+        await database.SaveChangesAsync(cancellationToken);
         return appointment.Id;
     }
 
     public async Task CancelAsync(Guid appointmentId, bool isDoctor, CancellationToken cancellationToken = default)
     {
-        var appointment = await dataBase.Appointments.FirstOrDefaultAsync(appointment => appointment.Id == appointmentId, cancellationToken)
+        var appointment = await database.Appointments.FirstOrDefaultAsync(appointment => appointment.Id == appointmentId, cancellationToken)
             ?? throw new NotFoundException(nameof(Appointment), appointmentId);
 
         if (!appointment.IsCancelable())
@@ -57,24 +57,24 @@ public class AppointmentService(IApplicationDbContext dataBase) : IAppointmentSe
             ? AppointmentState.CanceledByDoctor
             : AppointmentState.CanceledByPatient);
 
-        await dataBase.SaveChangesAsync(cancellationToken);
+        await database.SaveChangesAsync(cancellationToken);
     }
 
     public async Task ApproveAsync(Guid appointmentId, CancellationToken cancellationToken = default)
     {
-        var appointment = await dataBase.Appointments.FirstOrDefaultAsync(appointment => appointment.Id == appointmentId, cancellationToken)
+        var appointment = await database.Appointments.FirstOrDefaultAsync(appointment => appointment.Id == appointmentId, cancellationToken)
             ?? throw new NotFoundException(nameof(Appointment), appointmentId);
 
         if (appointment.State != AppointmentState.Pending)
             throw new ForbiddenException("Only pending appointments can be approved.");
 
         appointment.ChangeState(AppointmentState.Confirmed);
-        await dataBase.SaveChangesAsync(cancellationToken);
+        await database.SaveChangesAsync(cancellationToken);
     }
 
     public async Task<List<AppointmentDto>> GetByPatientAsync(Guid patientId, CancellationToken cancellationToken = default)
     {
-        return await dataBase.Appointments
+        return await database.Appointments
         .Where(appointment => appointment.PatientId == patientId)
         .Include(appointment => appointment.Doctor)
         .Include(appointment => appointment.Room)

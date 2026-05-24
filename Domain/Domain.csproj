@@ -5,8 +5,4 @@
     <AssemblyName>TPI_2026.Domain</AssemblyName>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="MediatR.Contracts" />
-  </ItemGroup>
-
 </Project>
