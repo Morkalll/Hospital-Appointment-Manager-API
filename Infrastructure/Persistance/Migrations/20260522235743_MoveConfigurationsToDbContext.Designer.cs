@@ -202,7 +202,7 @@ namespace TPI_2026.Infrastructure.Persistance.Migrations
                     b.HasDiscriminator().HasValue("Patient");
                 });
 
-            modelBuilder.Entity("TPI_2026.Domain.Entities.Recepcionist", b =>
+            modelBuilder.Entity("TPI_2026.Domain.Entities.Receptionist", b =>
                 {
                     b.HasBaseType("TPI_2026.Domain.Entities.User");
 
@@ -218,7 +218,7 @@ namespace TPI_2026.Infrastructure.Persistance.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.HasDiscriminator().HasValue("Recepcionist");
+                    b.HasDiscriminator().HasValue("Receptionist");
                 });
 
             modelBuilder.Entity("TPI_2026.Domain.Entities.Appointment", b =>

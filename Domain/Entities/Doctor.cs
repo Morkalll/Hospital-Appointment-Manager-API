@@ -9,7 +9,7 @@ public class Doctor : User
     public string Credential { get; set; } = string.Empty;
     // Atributo Specialty es del tipo enum Specialty
     public Specialty Specialty { get; set; }
-    public bool Disponible { get; set; } = true;
+    public bool IsAvailable { get; set; } = true;
 
     //Cardinalidades
     public ICollection<Room> Rooms { get; private set; } = new List<Room>();
