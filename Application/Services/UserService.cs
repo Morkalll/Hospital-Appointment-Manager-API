@@ -1,13 +1,57 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TPI_2026.Application.Abstractions.Interfaces;
 using TPI_2026.Application.Exceptions;
 using TPI_2026.Domain.Entities;
 using TPI_2026.Domain.Enums;
+using TPI_2026.Application.Responses;
 
 namespace TPI_2026.Application.Services;
 
-public class UserService(IApplicationDbContext dataBase) : IUserService
+public class UserService(IApplicationDbContext database, IPasswordHasher<User> hasher) : IUserService
 {
+    public async Task<List<UserDto>> GetAllAsync(CancellationToken cancellationToken = default)
+    {
+        var patients = await database.Patients
+            .Select(patient => new UserDto(patient.Id, patient.Name, patient.Email, patient.Role.ToString()))
+            .ToListAsync(cancellationToken);
+
+        var doctors = await database.Doctors
+            .Select(doctor => new UserDto(doctor.Id, doctor.Name, doctor.Email, doctor.Role.ToString()))
+            .ToListAsync(cancellationToken);
+
+        var receptionists = await database.Receptionists
+            .Select(receptionist => new UserDto(receptionist.Id, receptionist.Name, receptionist.Email, receptionist.Role.ToString()))
+            .ToListAsync(cancellationToken);
+
+        var administrators = await database.Administrators
+            .Select(admin => new UserDto(admin.Id, admin.Name, admin.Email, admin.Role.ToString()))
+            .ToListAsync(cancellationToken);
+
+        return [.. patients, .. doctors, .. receptionists, .. administrators];
+    }
+
+    public async Task<UserDto> GetByIdAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        var patient = await database.Patients.FirstOrDefaultAsync(patient => patient.Id == userId, cancellationToken);
+        if (patient is not null)
+            return new UserDto(patient.Id, patient.Name, patient.Email, patient.Role.ToString());
+
+        var doctor = await database.Doctors.FirstOrDefaultAsync(doctor => doctor.Id == userId, cancellationToken);
+        if (doctor is not null)
+            return new UserDto(doctor.Id, doctor.Name, doctor.Email, doctor.Role.ToString());
+
+        var receptionist = await database.Receptionists.FirstOrDefaultAsync(receptionist => receptionist.Id == userId, cancellationToken);
+        if (receptionist is not null)
+            return new UserDto(receptionist.Id, receptionist.Name, receptionist.Email, receptionist.Role.ToString());
+
+        var admin = await database.Administrators.FirstOrDefaultAsync(admin => admin.Id == userId, cancellationToken);
+        if (admin is not null)
+            return new UserDto(admin.Id, admin.Name, admin.Email, admin.Role.ToString());
+
+        throw new NotFoundException("User", userId);
+    }
+
     public async Task<Guid> CreatePatientAsync(
         string name,
         string email,
@@ -31,13 +75,13 @@ public class UserService(IApplicationDbContext dataBase) : IUserService
             throw new ForbiddenException("DNI is required.");
 
 
-        if (await dataBase.Patients.AnyAsync(patient => patient.Dni == dni, cancellationToken))
+        if (await database.Patients.AnyAsync(patient => patient.Dni == dni, cancellationToken))
             throw new ForbiddenException("A patient with that DNI already exists.");
 
         // Valida si el email ya existe en alguna de las tres tablas de usuarios.
-        if (await dataBase.Receptionists.AnyAsync(receptionist => receptionist.Email == email, cancellationToken) ||
-            await dataBase.Patients.AnyAsync(patient => patient.Email == email, cancellationToken) ||
-            await dataBase.Doctors.AnyAsync(doctor => doctor.Email == email, cancellationToken))
+        if (await database.Receptionists.AnyAsync(receptionist => receptionist.Email == email, cancellationToken) ||
+            await database.Patients.AnyAsync(patient => patient.Email == email, cancellationToken) ||
+            await database.Doctors.AnyAsync(doctor => doctor.Email == email, cancellationToken))
         {
             throw new ForbiddenException("A user with that email already exists.");
         }
@@ -46,18 +90,17 @@ public class UserService(IApplicationDbContext dataBase) : IUserService
         {
             Name = name,
             Email = email,
-            Password = password,
             Dni = dni,
             BirthDate = birthDate,
             PhoneNumber = phoneNumber,
             Adress = adress
         };
+        patient.Password = hasher.HashPassword(patient, password);
 
-        dataBase.Patients.Add(patient);
-        await dataBase.SaveChangesAsync(cancellationToken);
+        database.Patients.Add(patient);
+        await database.SaveChangesAsync(cancellationToken);
         return patient.Id;
     }
-
 
     public async Task<Guid> CreateDoctorAsync(
         string name,
@@ -81,27 +124,27 @@ public class UserService(IApplicationDbContext dataBase) : IUserService
 
 
         // Valida si el email ya existe en alguna de las tres tablas de usuarios.
-        if (await dataBase.Receptionists.AnyAsync(receptionist => receptionist.Email == email, cancellationToken) ||
-            await dataBase.Patients.AnyAsync(patient => patient.Email == email, cancellationToken) ||
-            await dataBase.Doctors.AnyAsync(doctor => doctor.Email == email, cancellationToken))
+        if (await database.Receptionists.AnyAsync(receptionist => receptionist.Email == email, cancellationToken) ||
+            await database.Patients.AnyAsync(patient => patient.Email == email, cancellationToken) ||
+            await database.Doctors.AnyAsync(doctor => doctor.Email == email, cancellationToken))
         {
             throw new ForbiddenException("A user with that email already exists.");
         }
 
-        if (await dataBase.Doctors.AnyAsync(doctor => doctor.Credential == credential, cancellationToken))
+        if (await database.Doctors.AnyAsync(doctor => doctor.Credential == credential, cancellationToken))
             throw new ForbiddenException("A doctor with that credential already exists.");
 
         var doctor = new Doctor
         {
             Name = name,
             Email = email,
-            Password = password,
             Credential = credential,
             Specialty = specialty
         };
+        doctor.Password = hasher.HashPassword(doctor, password);
 
-        dataBase.Doctors.Add(doctor);
-        await dataBase.SaveChangesAsync(cancellationToken);
+        database.Doctors.Add(doctor);
+        await database.SaveChangesAsync(cancellationToken);
         return doctor.Id;
     }
 
@@ -134,14 +177,14 @@ public class UserService(IApplicationDbContext dataBase) : IUserService
 
 
         // Valida si el email ya existe en alguna de las tres tablas de usuarios.
-        if (await dataBase.Receptionists.AnyAsync(receptionist => receptionist.Email == email, cancellationToken) ||
-            await dataBase.Patients.AnyAsync(patient => patient.Email == email, cancellationToken) ||
-            await dataBase.Doctors.AnyAsync(doctor => doctor.Email == email, cancellationToken))
+        if (await database.Receptionists.AnyAsync(receptionist => receptionist.Email == email, cancellationToken) ||
+            await database.Patients.AnyAsync(patient => patient.Email == email, cancellationToken) ||
+            await database.Doctors.AnyAsync(doctor => doctor.Email == email, cancellationToken))
         {
             throw new ForbiddenException("A user with that email already exists.");
         }
 
-        if (await dataBase.Receptionists.AnyAsync(receptionist => receptionist.EmployeeNumber == employeeNumber, cancellationToken))
+        if (await database.Receptionists.AnyAsync(receptionist => receptionist.EmployeeNumber == employeeNumber, cancellationToken))
             throw new ForbiddenException("A user with that employee number already exists.");
 
         var receptionist = new Receptionist
@@ -154,31 +197,31 @@ public class UserService(IApplicationDbContext dataBase) : IUserService
             Area = area
         };
 
-        dataBase.Receptionists.Add(receptionist);
-        await dataBase.SaveChangesAsync(cancellationToken);
+        database.Receptionists.Add(receptionist);
+        await database.SaveChangesAsync(cancellationToken);
         return receptionist.Id;
     }
 
     public async Task DeleteAsync(Guid userId, CancellationToken cancellationToken = default)
     {
-        var patient = await dataBase.Patients.FirstOrDefaultAsync(patient => patient.Id == userId, cancellationToken);
+        var patient = await database.Patients.FirstOrDefaultAsync(patient => patient.Id == userId, cancellationToken);
         if (patient is not null)
         {
-            dataBase.Patients.Remove(patient); await dataBase.SaveChangesAsync(cancellationToken);
+            database.Patients.Remove(patient); await database.SaveChangesAsync(cancellationToken);
             return;
         }
 
-        var doctor = await dataBase.Doctors.FirstOrDefaultAsync(doctor => doctor.Id == userId, cancellationToken);
+        var doctor = await database.Doctors.FirstOrDefaultAsync(doctor => doctor.Id == userId, cancellationToken);
         if (doctor is not null)
         {
-            dataBase.Doctors.Remove(doctor); await dataBase.SaveChangesAsync(cancellationToken);
+            database.Doctors.Remove(doctor); await database.SaveChangesAsync(cancellationToken);
             return;
         }
 
-        var receptionist = await dataBase.Receptionists.FirstOrDefaultAsync(receptionist => receptionist.Id == userId, cancellationToken);
+        var receptionist = await database.Receptionists.FirstOrDefaultAsync(receptionist => receptionist.Id == userId, cancellationToken);
         if (receptionist is not null)
         {
-            dataBase.Receptionists.Remove(receptionist); await dataBase.SaveChangesAsync(cancellationToken);
+            database.Receptionists.Remove(receptionist); await database.SaveChangesAsync(cancellationToken);
             return;
         }
 

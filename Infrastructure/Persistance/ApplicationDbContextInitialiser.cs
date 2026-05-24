@@ -9,7 +9,8 @@ namespace TPI_2026.Infrastructure.Persistance;
 public class ApplicationDbContextInitialiser
 (
     ILogger<ApplicationDbContextInitialiser> logger,
-    ApplicationDbContext context
+    ApplicationDbContext context,
+    IPasswordHasher<User> hasher
 )
 
 {
@@ -21,7 +22,7 @@ public class ApplicationDbContextInitialiser
         }
         catch (Exception exception)
         {
-            logger.LogError(exception, "Error al migrar la base de datos.");
+            logger.LogError(exception, "Database migration error.");
             throw;
         }
     }
@@ -34,7 +35,7 @@ public class ApplicationDbContextInitialiser
         }
         catch (Exception exception)
         {
-            logger.LogError(exception, "Error al sembrar datos iniciales.");
+            logger.LogError(exception, "Initial seeding error.");
             throw;
         }
     }
@@ -47,12 +48,12 @@ public class ApplicationDbContextInitialiser
             {
                 Name = "Admin",
                 Email = "admin@hospital.com",
-                Password = "Admin1234!"
             };
+            admin.Password = hasher.HashPassword(admin, "Admin1234!");
 
             context.Administrators.Add(admin);
             await context.SaveChangesAsync();
-            logger.LogInformation("Admin inicial creado.");
+            logger.LogInformation("Initial admin created.");
         }
     }
 }

@@ -6,7 +6,7 @@ using TPI_2026.Domain.Enums;
 
 namespace TPI_2026.Application.Services;
 
-public class MedicalHistoryService(IApplicationDbContext dataBase) : IMedicalHistoryService
+public class MedicalHistoryService(IApplicationDbContext database) : IMedicalHistoryService
 {
     public async Task<Guid> AddEntryAsync(
         Guid appointmentId,
@@ -20,7 +20,7 @@ public class MedicalHistoryService(IApplicationDbContext dataBase) : IMedicalHis
             throw new ForbiddenException("Diagnostic cannot exceed 2000 characters.");
 
 
-        var appointment = await dataBase.Appointments
+        var appointment = await database.Appointments
             .Include(appointment => appointment.MedicalHistory)
             .FirstOrDefaultAsync(appointment => appointment.Id == appointmentId, cancellationToken)
             ?? throw new NotFoundException(nameof(Domain.Entities.Appointment), appointmentId);
@@ -31,7 +31,7 @@ public class MedicalHistoryService(IApplicationDbContext dataBase) : IMedicalHis
         if (appointment.MedicalHistory is not null)
         {
             appointment.MedicalHistory.AddEntry(diagnostic);
-            await dataBase.SaveChangesAsync(cancellationToken);
+            await database.SaveChangesAsync(cancellationToken);
             return appointment.MedicalHistory.Id;
         }
 
@@ -39,14 +39,14 @@ public class MedicalHistoryService(IApplicationDbContext dataBase) : IMedicalHis
         var history = Domain.Entities.MedicalHistory.Create(
             appointmentId, appointment.PatientId, diagnostic, appointment.DateTime);
 
-        dataBase.MedicalHistories.Add(history);
-        await dataBase.SaveChangesAsync(cancellationToken);
+        database.MedicalHistories.Add(history);
+        await database.SaveChangesAsync(cancellationToken);
         return history.Id;
     }
 
     public async Task<List<MedicalHistoryDto>> GetByPatientAsync(Guid patientId, CancellationToken cancellationToken = default)
     {
-        return await dataBase.MedicalHistories
+        return await database.MedicalHistories
             .Where(medicalHistory => medicalHistory.PatientId == patientId)
             .Include(medicalHistory => medicalHistory.Appointment).ThenInclude(appointment => appointment!.Doctor)
             .Select(medicalHistory => new MedicalHistoryDto(

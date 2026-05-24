@@ -1,9 +1,17 @@
 using TPI_2026.Domain.Enums;
+using TPI_2026.Application.Responses;
 
 namespace TPI_2026.Application.Abstractions.Interfaces;
 
 public interface IUserService
 {
+    Task<List<UserDto>> GetAllAsync(
+        CancellationToken ct = default);
+
+    Task<UserDto> GetByIdAsync(
+        Guid userId,
+        CancellationToken ct = default);
+
     Task<Guid> CreatePatientAsync(
         string name,
         string email,
