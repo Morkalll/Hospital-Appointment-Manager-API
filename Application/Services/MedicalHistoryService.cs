@@ -44,7 +44,7 @@ public class MedicalHistoryService(IApplicationDbContext database) : IMedicalHis
         return history.Id;
     }
 
-    public async Task<List<MedicalHistoryDto>> GetByPatientAsync(Guid patientId, CancellationToken cancellationToken = default)
+    public async Task<List<MedicalHistoryDto>> GetPatientByIdAsync(Guid patientId, CancellationToken cancellationToken = default)
     {
         return await database.MedicalHistories
             .Where(medicalHistory => medicalHistory.PatientId == patientId)
