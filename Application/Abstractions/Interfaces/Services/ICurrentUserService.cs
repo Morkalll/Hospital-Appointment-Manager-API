@@ -1,5 +1,5 @@
 
-namespace TPI_2026.Application.Services;
+namespace TPI_2026.Application.Abstractions.Interfaces.Services;
 
 public interface ICurrentUserService
 {

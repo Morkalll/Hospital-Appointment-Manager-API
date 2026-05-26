@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc; 
+using Microsoft.AspNetCore.Mvc;
 using TPI_2026.Domain.Enums;
-using TPI_2026.Application.Abstractions.Interfaces;
+using TPI_2026.Application.Abstractions.Interfaces.Services;
 
 
 
@@ -36,6 +36,6 @@ namespace TPI_2026.Presentation.Controllers
             }
         }
 
-        
+
     }
 }

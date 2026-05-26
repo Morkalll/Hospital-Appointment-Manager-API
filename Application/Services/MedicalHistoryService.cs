@@ -1,12 +1,14 @@
 using Microsoft.EntityFrameworkCore;
-using TPI_2026.Application.Abstractions.Interfaces;
+using TPI_2026.Application.Abstractions.Interfaces.Services;
+using TPI_2026.Application.Abstractions.Interfaces.Repositories;
 using TPI_2026.Application.Exceptions;
 using TPI_2026.Application.Responses;
+using TPI_2026.Domain.Entities;
 using TPI_2026.Domain.Enums;
 
 namespace TPI_2026.Application.Services;
 
-public class MedicalHistoryService(IApplicationDbContext database) : IMedicalHistoryService
+public class MedicalHistoryService(IUnitOfWork unitOfWork) : IMedicalHistoryService
 {
     public async Task<Guid> AddEntryAsync(
         Guid appointmentId,
@@ -20,10 +22,8 @@ public class MedicalHistoryService(IApplicationDbContext database) : IMedicalHis
             throw new ForbiddenException("Diagnostic cannot exceed 2000 characters.");
 
 
-        var appointment = await database.Appointments
-            .Include(appointment => appointment.MedicalHistory)
-            .FirstOrDefaultAsync(appointment => appointment.Id == appointmentId, cancellationToken)
-            ?? throw new NotFoundException(nameof(Domain.Entities.Appointment), appointmentId);
+        var appointment = await unitOfWork.Appointments.GetWithMedicalHistoryAsync(appointmentId, cancellationToken)
+            ?? throw new NotFoundException(nameof(Appointment), appointmentId);
 
         if (appointment.State != AppointmentState.Confirmed)
             throw new ForbiddenException("Medical history can only be added to confirmed appointments.");
@@ -31,31 +31,31 @@ public class MedicalHistoryService(IApplicationDbContext database) : IMedicalHis
         if (appointment.MedicalHistory is not null)
         {
             appointment.MedicalHistory.AddEntry(diagnostic);
-            await database.SaveChangesAsync(cancellationToken);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
             return appointment.MedicalHistory.Id;
         }
 
 
-        var history = Domain.Entities.MedicalHistory.Create(
+        var history = MedicalHistory.Create(
             appointmentId, appointment.PatientId, diagnostic, appointment.DateTime);
 
-        database.MedicalHistories.Add(history);
-        await database.SaveChangesAsync(cancellationToken);
+        unitOfWork.MedicalHistories.Add(history);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
         return history.Id;
     }
 
     public async Task<List<MedicalHistoryDto>> GetPatientByIdAsync(Guid patientId, CancellationToken cancellationToken = default)
     {
-        return await database.MedicalHistories
-            .Where(medicalHistory => medicalHistory.PatientId == patientId)
-            .Include(medicalHistory => medicalHistory.Appointment).ThenInclude(appointment => appointment!.Doctor)
-            .Select(medicalHistory => new MedicalHistoryDto(
+        var medicalHistories = await unitOfWork.MedicalHistories.GetByPatientIdWithDetailsAsync(patientId, cancellationToken);
+
+        return medicalHistories
+        .Select(medicalHistory => new MedicalHistoryDto(
                 medicalHistory.Id,
                 medicalHistory.AppointmentId,
                 medicalHistory.Appointment!.Doctor!.Name,
                 medicalHistory.DateTime,
                 medicalHistory.Diagnostic,
                 medicalHistory.GetSummary()))
-            .ToListAsync(cancellationToken);
+        .ToList();
     }
 }

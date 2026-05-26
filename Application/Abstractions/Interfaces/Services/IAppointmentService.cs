@@ -1,7 +1,7 @@
 using System.Globalization;
 using TPI_2026.Application.Responses;
 
-namespace TPI_2026.Application.Abstractions.Interfaces;
+namespace TPI_2026.Application.Abstractions.Interfaces.Services;
 
 public interface IAppointmentService
 {

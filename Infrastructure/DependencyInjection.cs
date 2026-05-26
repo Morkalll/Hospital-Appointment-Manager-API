@@ -1,5 +1,6 @@
-using TPI_2026.Application.Abstractions.Interfaces;
+using TPI_2026.Application.Abstractions.Interfaces.Repositories;
 using TPI_2026.Infrastructure.Persistance;
+using TPI_2026.Infrastructure.Persistance.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,20 +9,14 @@ namespace TPI_2026.Infrastructure;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddInfrastructureServices(
-        this IServiceCollection services,
-        IConfiguration configuration)
+    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("DefaultConnection")
-            ?? "Data Source=hospital.db";
-
         services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseSqlite(connectionString));
+            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
-        services.AddScoped<IApplicationDbContext>(serviceProvider =>
-            (IApplicationDbContext)serviceProvider.GetRequiredService<ApplicationDbContext>());
+        services.AddScoped<DbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
 
-        services.AddScoped<ApplicationDbContextInitialiser>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         return services;
     }
