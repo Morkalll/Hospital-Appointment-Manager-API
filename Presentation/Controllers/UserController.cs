@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc; 
+using Microsoft.AspNetCore.Mvc;
 using TPI_2026.Domain.Enums;
-using TPI_2026.Application.Abstractions.Interfaces;
+using TPI_2026.Application.Abstractions.Interfaces.Services;
 
 
 
@@ -35,7 +35,7 @@ namespace TPI_2026.Presentation.Controllers
         {
             try
             {
-                var patientId = await _UserService.CreatePatientAsync(name, email, password, dni, birthDate, phoneNumber, adress, cancellationToken);
+                var patientId = await _UserService.RegisterPatientAsync(name, email, password, dni, birthDate, phoneNumber, adress, cancellationToken);
                 return Ok(new { Id = patientId });
             }
             catch (Exception ex)
@@ -57,18 +57,18 @@ namespace TPI_2026.Presentation.Controllers
         {
             try
             {
-                var doctorId = await _UserService.CreateDoctorAsync(name, email, password, credential, specialty, cancellationToken);
+                var doctorId = await _UserService.RegisterDoctorAsync(name, email, password, credential, specialty, cancellationToken);
                 return Ok(new { Id = doctorId });
             }
             catch (Exception ex)
             {
                 return StatusCode(500, ex.Message);
-                
+
             }
         }
-        
+
         [HttpPost("create-receptionist")]
-        public async Task<IActionResult> CreateReceptionist(    
+        public async Task<IActionResult> CreateReceptionist(
             [FromBody]
             string name,
             string email,
@@ -81,7 +81,7 @@ namespace TPI_2026.Presentation.Controllers
         {
             try
             {
-                var receptionistId = await _UserService.CreateReceptionistAsync(name, email, password, employeeNumber, workingShift, area, cancellationToken);
+                var receptionistId = await _UserService.RegisterReceptionistAsync(name, email, password, employeeNumber, workingShift, area, cancellationToken);
                 return Ok(new { Id = receptionistId });
             }
             catch (Exception ex)

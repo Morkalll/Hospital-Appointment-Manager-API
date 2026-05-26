@@ -1,7 +1,7 @@
 using TPI_2026.Domain.Enums;
 using TPI_2026.Application.Responses;
 
-namespace TPI_2026.Application.Abstractions.Interfaces;
+namespace TPI_2026.Application.Abstractions.Interfaces.Services;
 
 public interface IUserService
 {
@@ -12,7 +12,7 @@ public interface IUserService
         Guid userId,
         CancellationToken ct = default);
 
-    Task<Guid> CreatePatientAsync(
+    Task<Guid> RegisterPatientAsync(
         string name,
         string email,
         string password,
@@ -22,7 +22,7 @@ public interface IUserService
         string adress,
         CancellationToken cancellationToken = default);
 
-    Task<Guid> CreateDoctorAsync(
+    Task<Guid> RegisterDoctorAsync(
         string name,
         string email,
         string password,
@@ -30,7 +30,7 @@ public interface IUserService
         Specialty specialty,
         CancellationToken cancellationToken = default);
 
-    Task<Guid> CreateReceptionistAsync(
+    Task<Guid> RegisterReceptionistAsync(
         string name,
         string email,
         string password,

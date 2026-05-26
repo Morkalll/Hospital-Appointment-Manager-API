@@ -11,7 +11,7 @@ builder.AddServiceDefaults();
 
 builder.AddKeyVaultIfConfigured();
 builder.Services.AddApplicationServices();
-builder.Services.AddInfrastructureServices(builder.Configuration);
+builder.AddInfrastructureServices();
 builder.Services.AddPresentationServices();
 builder.Services.AddControllers();
 
