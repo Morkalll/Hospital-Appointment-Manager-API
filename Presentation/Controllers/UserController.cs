@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TPI_2026.Domain.Enums;
 using TPI_2026.Application.Abstractions.Interfaces.Services;
+using TPI_2026.Application.Requests;
 
 
 
@@ -22,72 +23,32 @@ namespace TPI_2026.Presentation.Controllers
 
         [HttpPost("create-patient")]
         public async Task<IActionResult> CreatePatient(
-            [FromBody]
-            string name,
-            string email,
-            string password,
-            string dni,
-            string birthDate,
-            string phoneNumber,
-            string adress,
+            [FromBody] CreatePatientReq request,
             CancellationToken cancellationToken = default
         )
         {
-            try
-            {
-                var patientId = await _UserService.RegisterPatientAsync(name, email, password, dni, birthDate, phoneNumber, adress, cancellationToken);
-                return Ok(new { Id = patientId });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
+            var patientId = await _UserService.RegisterPatientAsync(request.Name, request.Email, request.Password, request.Dni, request.BirthDate, request.PhoneNumber, request.Adress, cancellationToken);
+            return Ok(new { Id = patientId });
         }
 
         [HttpPost("create-doctor")]
         public async Task<IActionResult> CreateDoctor(
-            [FromBody]
-            string name,
-            string email,
-            string password,
-            string credential,
-            Specialty specialty,
+            [FromBody] CreateDoctorReq request,
             CancellationToken cancellationToken = default
         )
         {
-            try
-            {
-                var doctorId = await _UserService.RegisterDoctorAsync(name, email, password, credential, specialty, cancellationToken);
-                return Ok(new { Id = doctorId });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-
-            }
+            var doctorId = await _UserService.RegisterDoctorAsync(request.Name, request.Email, request.Password, request.Credential, request.Specialty, cancellationToken);
+            return Ok(new { Id = doctorId });
         }
 
         [HttpPost("create-receptionist")]
         public async Task<IActionResult> CreateReceptionist(
-            [FromBody]
-            string name,
-            string email,
-            string password,
-            string employeeNumber,
-            string workingShift,
-            string area,
+            [FromBody] CreateReceptionistReq request,
             CancellationToken cancellationToken = default
         )
         {
-            try
-            {
-                var receptionistId = await _UserService.RegisterReceptionistAsync(name, email, password, employeeNumber, workingShift, area, cancellationToken);
-                return Ok(new { Id = receptionistId });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
+            var receptionistId = await _UserService.RegisterReceptionistAsync(request.Name, request.Email, request.Password, request.EmployeeNumber, request.WorkingShift, request.Area, cancellationToken);
+            return Ok(new { Id = receptionistId });
         }
 
         [HttpDelete("{id}")]
@@ -95,15 +56,8 @@ namespace TPI_2026.Presentation.Controllers
             [FromRoute] Guid id,
             CancellationToken cancellationToken = default)
         {
-            try
-            {
-                await _UserService.DeleteAsync(id, cancellationToken);
-                return Ok(new { Message = "User deleted successfully." });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
+            await _UserService.DeleteAsync(id, cancellationToken);
+            return Ok(new { Message = "User deleted successfully." });
         }
     }
 }
