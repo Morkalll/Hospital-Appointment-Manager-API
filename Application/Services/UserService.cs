@@ -202,11 +202,12 @@ public class UserService(IUnitOfWork unitOfWork, IPasswordHasher<User> hasher) :
         {
             Name = name,
             Email = email,
-            Password = password,
             EmployeeNumber = employeeNumber,
             WorkingShift = workingShift,
             Area = area
         };
+
+        receptionist.Password = hasher.HashPassword(receptionist, password);
 
         unitOfWork.Receptionists.Add(receptionist);
         await unitOfWork.SaveChangesAsync(cancellationToken);

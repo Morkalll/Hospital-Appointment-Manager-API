@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TPI_2026.Domain.Enums;
 using TPI_2026.Application.Abstractions.Interfaces.Services;
+using TPI_2026.Application.Requests;
 
 
 
@@ -22,43 +23,23 @@ namespace TPI_2026.Presentation.Controllers
 
         [HttpPost("create-appointment")]
         public async Task<IActionResult> CreateAppointment(
-            [FromBody]
-            Guid patientId,
-            Guid doctorId,
-            Guid roomId,
-            DateTime dateTime,
+            [FromBody] CreateAppointmentReq request,
             CancellationToken cancellationToken = default
         )
         {
-            try
-            {
-                var appointmentId = await _AppointmentService.CreateAsync(patientId, doctorId, roomId, dateTime, cancellationToken);
-                return Ok(new { Id = appointmentId });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
+            var appointmentId = await _AppointmentService.CreateAsync(request.PatientId, request.DoctorId, request.RoomId, request.DateTime, cancellationToken);
+            return Ok(new { Id = appointmentId });
         }
 
         [HttpPut("cancel-appointment/{appointmentId}")]
         public async Task<IActionResult> CancelAppointment(
-            [FromRoute]
-            Guid appointmentId,
-            [FromBody]
-            bool isDoctor,
+            [FromRoute] Guid appointmentId,
+            [FromBody] CancelAppointmentReq request,
             CancellationToken cancellationToken = default
         )
         {
-            try
-            {
-                await _AppointmentService.CancelAsync(appointmentId, isDoctor, cancellationToken);
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
+            await _AppointmentService.CancelAsync(appointmentId, request.IsDoctor, cancellationToken);
+            return Ok();
         }
 
         [HttpPut("approve-appointment/{appointmentId}")]
@@ -68,15 +49,8 @@ namespace TPI_2026.Presentation.Controllers
             CancellationToken cancellationToken = default
         )
         {
-            try
-            {
-                await _AppointmentService.ApproveAsync(appointmentId, cancellationToken);
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
+            await _AppointmentService.ApproveAsync(appointmentId, cancellationToken);
+            return Ok();
         }
 
         [HttpGet("patient-appointments/{patientId}")]
@@ -86,15 +60,8 @@ namespace TPI_2026.Presentation.Controllers
             CancellationToken cancellationToken = default
         )
         {
-            try
-            {
-                var appointments = await _AppointmentService.GetByPatientAsync(patientId, cancellationToken);
-                return Ok(appointments);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
+            var appointments = await _AppointmentService.GetByPatientAsync(patientId, cancellationToken);
+            return Ok(appointments);
         }
     }
 }

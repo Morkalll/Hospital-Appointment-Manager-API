@@ -25,15 +25,8 @@ namespace TPI_2026.Presentation.Controllers
             CancellationToken cancellationToken = default
         )
         {
-            try
-            {
-                var medicalHistory = await _MedicalHistoryService.GetPatientByIdAsync(patientId, cancellationToken);
-                return Ok(medicalHistory);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
+            var medicalHistory = await _MedicalHistoryService.GetPatientByIdAsync(patientId, cancellationToken);
+            return Ok(medicalHistory);
         }
 
 

@@ -2,6 +2,7 @@ using TPI_2026.Application;
 using TPI_2026.Infrastructure;
 using TPI_2026.Infrastructure.Persistance;
 using TPI_2026.Presentation.Infrastructure;
+using TPI_2026.Presentation.Middleware;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -39,7 +40,7 @@ app.UseFileServer();
 app.MapOpenApi();
 app.MapScalarApiReference();
 
-app.UseExceptionHandler(options => { });
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.MapControllers();
 app.MapDefaultEndpoints();
