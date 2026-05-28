@@ -8,13 +8,14 @@ using TPI_2026.Application.Abstractions.Interfaces.Repositories;
 using TPI_2026.Application.Abstractions.Interfaces.Services;
 using TPI_2026.Application.Exceptions;
 using TPI_2026.Domain.Entities;
+using TPI_2026.Application.Responses;
 
 namespace TPI_2026.Application.Services;
 
 
 public class AuthService(IUnitOfWork unitOfWork, IPasswordHasher<User> hasher, IConfiguration configuration) : IAuthService
 {
-    public async Task<string> LoginAsync(string email, string password, CancellationToken cancellationToken = default)
+    public async Task<AuthResponse> LoginAsync(string email, string password, CancellationToken cancellationToken = default)
     {
         // Busca el usuario en todas las tablas. 
         User? user = await unitOfWork.Patients.FirstOrDefaultAsync(p => p.Email == email, cancellationToken)
@@ -30,8 +31,14 @@ public class AuthService(IUnitOfWork unitOfWork, IPasswordHasher<User> hasher, I
         if (result == PasswordVerificationResult.Failed)
             throw new ForbiddenException("Invalid credentials.");
 
-        return GenerateToken(user);
-    }
+        return new AuthResponse
+        {
+            Token = GenerateToken(user),
+            Role = user.Role.ToString(),
+            UserId = user.Id,
+            Email = user.Email
+        };
+    }  
 
     private string GenerateToken(User user)
     {
