@@ -22,6 +22,7 @@ namespace TPI_2026.Presentation.Controllers
         }
 
         [HttpPost("create-appointment")]
+        [Authorize (Policy = "Staff")]
         public async Task<IActionResult> CreateAppointment(
             [FromBody] CreateAppointmentReq request,
             CancellationToken cancellationToken = default
@@ -32,6 +33,7 @@ namespace TPI_2026.Presentation.Controllers
         }
 
         [HttpPut("cancel-appointment/{appointmentId}")]
+        [Authorize]
         public async Task<IActionResult> CancelAppointment(
             [FromRoute] Guid appointmentId,
             [FromBody] CancelAppointmentReq request,
@@ -43,6 +45,8 @@ namespace TPI_2026.Presentation.Controllers
         }
 
         [HttpPut("approve-appointment/{appointmentId}")]
+        [Authorize(Policy = "Staff")]
+
         public async Task<IActionResult> ApproveAppointment(
             [FromRoute]
             Guid appointmentId,
@@ -54,6 +58,7 @@ namespace TPI_2026.Presentation.Controllers
         }
 
         [HttpGet("patient-appointments/{patientId}")]
+        [Authorize]
         public async Task<IActionResult> GetPatientAppointments(
             [FromRoute]
             Guid patientId,

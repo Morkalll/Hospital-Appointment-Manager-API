@@ -10,7 +10,7 @@ using TPI_2026.Domain.Exceptions;
 
 namespace TPI_2026.Application.Services;
 
-public class AppointmentService(IUnitOfWork unitOfWork) : IAppointmentService
+public class AppointmentService(IUnitOfWork unitOfWork, ICurrentUserService currentUserService) : IAppointmentService
 {
     public async Task<Guid> CreateAsync(Guid patientId, Guid doctorId, Guid roomId, DateTime dateTime, CancellationToken cancellationToken = default)
     {
@@ -51,6 +51,12 @@ public class AppointmentService(IUnitOfWork unitOfWork) : IAppointmentService
     {
         var appointment = await unitOfWork.Appointments.GetByIdAsync(appointmentId, cancellationToken)
             ?? throw new NotFoundException(nameof(Appointment), appointmentId);
+        
+        if (CurrentUserService.Role == "Patient" && appointment.PatientId != CurrentUserService.UserId)
+            throw new ForbiddenException("A patient can only cancel their own appointments.");
+        
+        if (CurrentUserService.Role == "Doctor" && appointment.DoctorId != CurrentUserService.UserId)
+            throw new ForbiddenException("A doctor can only cancel their own appointments.");
 
         if (!appointment.IsCancelable())
             throw new NotCancellableAppointmentException(appointmentId);
@@ -76,6 +82,9 @@ public class AppointmentService(IUnitOfWork unitOfWork) : IAppointmentService
 
     public async Task<List<AppointmentDto>> GetByPatientAsync(Guid patientId, CancellationToken cancellationToken = default)
     {
+        // Validacon para que los pacientes solo puedan ver sus propios turnos
+        if (currentUserService.Role == "Patient" && currentUserService.UserId != patientId)
+            throw new ForbiddenException("A patient can only view their own appointments.");
         var appointments = await unitOfWork.Appointments.GetByPatientIdAsync(patientId, cancellationToken);
 
         return appointments
