@@ -22,6 +22,7 @@ namespace TPI_2026.Presentation.Controllers
         }
 
         [HttpPost("create-patient")]
+        [Authorize(Policy = "Staff")]
         public async Task<IActionResult> CreatePatient(
             [FromBody] CreatePatientReq request,
             CancellationToken cancellationToken = default
@@ -32,6 +33,7 @@ namespace TPI_2026.Presentation.Controllers
         }
 
         [HttpPost("create-doctor")]
+        [Authorize(Policy = "AdministratorOnly")]
         public async Task<IActionResult> CreateDoctor(
             [FromBody] CreateDoctorReq request,
             CancellationToken cancellationToken = default
@@ -42,6 +44,7 @@ namespace TPI_2026.Presentation.Controllers
         }
 
         [HttpPost("create-receptionist")]
+        [Authorize(Policy = "AdministratorOnly")]
         public async Task<IActionResult> CreateReceptionist(
             [FromBody] CreateReceptionistReq request,
             CancellationToken cancellationToken = default
@@ -52,6 +55,7 @@ namespace TPI_2026.Presentation.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Policy = "AdministratorOnly")]
         public async Task<IActionResult> DeleteUser(
             [FromRoute] Guid id,
             CancellationToken cancellationToken = default)

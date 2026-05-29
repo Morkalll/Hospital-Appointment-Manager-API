@@ -18,6 +18,8 @@ public static class DependencyInjection
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+        services.AddScoped<ICurrentUserService, CurrentUserService>();
+
         return services;
     }
 }
