@@ -40,7 +40,15 @@ public class Appointment : BaseEntity
     {
         var previousState = State;
         State = newState;
-        AddDomainEvent(new AppointmentChangedEvent(this, previousState));
+
+        if (newState is AppointmentState.CanceledByDoctor or AppointmentState.CanceledByPatient)
+        {
+            AddDomainEvent(new AppointmentCanceledEvent(this, newState));
+        }
+        else
+        {
+            AddDomainEvent(new AppointmentChangedEvent(this, previousState));
+        }
     }
 
     public bool IsCancelable()
