@@ -1,16 +1,12 @@
 using System.Reflection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using TPI_2026.Application;
-using TPI_2026.Application.Abstractions.Interfaces;
 using TPI_2026.Infrastructure.Persistance;
 using TPI_2026.Presentation.Authorization;
-using TPI_2026.Domain.Entities;
 
 namespace TPI_2026.Presentation.Infrastructure;
 
@@ -31,21 +27,6 @@ public static class ApplicationExtensions
     public static WebApplicationBuilder AddApplicationServices(this WebApplicationBuilder builder)
     {
         builder.Services.AddApplicationServices();
-        return builder;
-    }
-
-    public static WebApplicationBuilder AddInfrastructureServices(this WebApplicationBuilder builder)
-    {
-        builder.Services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseSqlite(
-                builder.Configuration.GetConnectionString("TPI_2026Db")
-                ?? "Data Source=TPI_2026.db"));
-
-        builder.Services.AddScoped<ApplicationDbContextInitialiser>();
-        builder.Services.AddScoped<ApplicationDbContext>();
-
-        builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
-
         return builder;
     }
 

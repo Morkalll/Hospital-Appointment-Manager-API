@@ -6,6 +6,7 @@ using TPI_2026.Application.Exceptions;
 using TPI_2026.Application.Responses;
 using TPI_2026.Domain.Entities;
 using TPI_2026.Domain.Enums;
+using TPI_2026.Domain.Events;
 using TPI_2026.Domain.Exceptions;
 
 namespace TPI_2026.Application.Services;
@@ -41,9 +42,25 @@ public class AppointmentService(IUnitOfWork unitOfWork, ICurrentUserService curr
         if (overlaps)
             throw new ForbiddenException("The doctor already has an appointment at that time.");
 
-        var appointment = Appointment.Create(patientId, doctorId, roomId, dateTime);
+        // Se asignan las claves foráneas
+        var appointment = Appointment.Create(
+            patientId,
+            doctorId,
+            roomId,
+            dateTime);
+
+        // Se asignan las propiedades de navegación (para hacer: 'Patient.[]' 'Doctor.[]' 'Room.[]') 
+        var patientEntity = await unitOfWork.Patients.GetByIdAsync(patientId, cancellationToken);
+        appointment.Patient = patientEntity;
+        appointment.Doctor = doctor; // Traído en línea 23
+        appointment.Room = await unitOfWork.Rooms.GetByIdAsync(roomId, cancellationToken);
+
+        appointment.AddDomainEvent(new AppointmentCreatedEvent(appointment));
+
         unitOfWork.Appointments.Add(appointment);
+
         await unitOfWork.SaveChangesAsync(cancellationToken);
+
         return appointment.Id;
     }
 
@@ -51,15 +68,18 @@ public class AppointmentService(IUnitOfWork unitOfWork, ICurrentUserService curr
     {
         var appointment = await unitOfWork.Appointments.GetByIdAsync(appointmentId, cancellationToken)
             ?? throw new NotFoundException(nameof(Appointment), appointmentId);
-        
-        if (CurrentUserService.Role == "Patient" && appointment.PatientId != CurrentUserService.UserId)
+
+        if (currentUserService.Role == "Patient" && appointment.PatientId != currentUserService.UserId)
             throw new ForbiddenException("A patient can only cancel their own appointments.");
-        
-        if (CurrentUserService.Role == "Doctor" && appointment.DoctorId != CurrentUserService.UserId)
+
+        if (currentUserService.Role == "Doctor" && appointment.DoctorId != currentUserService.UserId)
             throw new ForbiddenException("A doctor can only cancel their own appointments.");
 
         if (!appointment.IsCancelable())
             throw new NotCancellableAppointmentException(appointmentId);
+
+        appointment.Patient = await unitOfWork.Patients.GetByIdAsync(appointment.PatientId, cancellationToken);
+        appointment.Doctor = await unitOfWork.Doctors.GetByIdAsync(appointment.DoctorId, cancellationToken);
 
         appointment.ChangeState(isDoctor
             ? AppointmentState.CanceledByDoctor

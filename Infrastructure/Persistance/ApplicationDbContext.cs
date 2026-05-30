@@ -1,6 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TPI_2026.Domain.Entities;
-using TPI_2026.Domain.Common; // para usar el BaseEvent
+using TPI_2026.Domain.Common;
+using TPI_2026.Application.Abstractions.Interfaces.Events;
+using Microsoft.Identity.Client;
+using System.Configuration.Internal;
+using Microsoft.Extensions.DependencyInjection; // para usar el BaseEvent
 
 namespace TPI_2026.Infrastructure.Persistance;
 
@@ -8,8 +12,11 @@ namespace TPI_2026.Infrastructure.Persistance;
 // que el repo del profe no la tiene, aparte eso se usa para proyectos muy grandes y que el dbcontext no te quede enorme. 
 public class ApplicationDbContext : DbContext
 {
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+    private readonly IServiceProvider _serviceProvider; // Conoce todas las interfaces, clases y servicios en 'DependencyInjection.cs'
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, IServiceProvider serviceProvider)
+    : base(options)
     {
+        _serviceProvider = serviceProvider;
     }
 
     // Cada DbSet representa una tabla en la base de datos
@@ -113,5 +120,68 @@ public class ApplicationDbContext : DbContext
             .WithMany(p => p.MedicalHistories)
             .HasForeignKey(mh => mh.PatientId)
             .OnDelete(DeleteBehavior.Cascade);
+    }
+
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        /* Se filtran las entidades que heredan de BaseEntity y que tengan algún evento pendiente
+           en su lista interna DomainEvents */
+        var entitiesWithEvents = ChangeTracker.Entries<BaseEntity>()
+        .Where(e => e.Entity.DomainEvents.Any())
+        .Select(e => e.Entity)
+        .ToList();
+
+        // Unifica en una sola lista los eventos pendientes de diferentes entidades
+        var domainEvents = entitiesWithEvents.SelectMany(e => e.DomainEvents).ToList();
+
+        /* Limpia los eventos pendientes en las listas internas de las entidades,
+           ya que ahora las almacenamos acá y tenemos que evitar duplicados */
+        entitiesWithEvents.ForEach(e => e.ClearDomainEvents());
+
+        // Se guardan los cambios en la base de datos, y el resultado (int) dentro de 'result' 
+        var result = await base.SaveChangesAsync(cancellationToken);
+
+        // Se despacha cada manejador de eventos según los que hay pendientes
+        foreach (var domainEvent in domainEvents)
+        {
+            await DispatcherEventAsync(domainEvent, cancellationToken);
+        }
+
+        // Se retorna el total de filas modificadas (ya que este método debe retornar un int)
+        return result;
+    }
+
+
+    private async Task DispatcherEventAsync(BaseEvent domainEvent, CancellationToken cancellationToken)
+    {
+        /* 
+        Se accede al "molde" de una clase conocida ('IEventHandler'), 
+        y se le asigna como tipo de dato a retornar ('<>') aquel que corresponda 
+        a la variable que se le pase por parámetro ('domainEvent'),
+        para crear de forma dinámica cierta interfaz, cuyas clases que la implementen 
+        serán buscadas más adelante
+        */
+        var eventHandlerType = typeof(IEventHandler<>).MakeGenericType(domainEvent.GetType());
+
+        // Se buscan todas las clases que implementen dicha interfaz 
+        var eventHandlers = _serviceProvider.GetServices(eventHandlerType);
+
+        foreach (var eventHandler in eventHandlers)
+        {
+            // Si no encuentra manejador de evento por algún motivo, pasa al siguiente en la lista
+            if (eventHandler is null) continue;
+
+            // Dentro del manejador de eventos encontrado, busca el método que almacena su lógica
+            var method = eventHandler.GetType().GetMethod("HandleAsync");
+            if (method is not null)
+            {
+                /*
+                Se ejecuta el método. Llamar a 'Invoke' siempre devuelve objetos genéricos,
+                por lo que hay que aclararle mediante '(Task)' que lo trate como un asíncrono,
+                así podrá aplicarle el 'await' del comienzo
+                */
+                await (Task)method.Invoke(eventHandler, [domainEvent, cancellationToken])!;
+            }
+        }
     }
 }
