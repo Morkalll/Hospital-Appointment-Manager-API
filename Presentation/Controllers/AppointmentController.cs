@@ -40,7 +40,7 @@ namespace TPI_2026.Presentation.Controllers
             CancellationToken cancellationToken = default
         )
         {
-            await _AppointmentService.CancelAsync(appointmentId, request.IsDoctor, cancellationToken);
+            await _AppointmentService.CancelAsync(appointmentId, cancellationToken);
             return Ok();
         }
 

@@ -1,6 +1,8 @@
 using Microsoft.Extensions.DependencyInjection;
+using TPI_2026.Presentation.Authorization;
 
 namespace TPI_2026.Presentation.Infrastructure;
+
 
 public static class DependencyInjection
 {
