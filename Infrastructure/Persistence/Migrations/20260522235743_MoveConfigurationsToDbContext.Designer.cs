@@ -4,15 +4,15 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using TPI_2026.Infrastructure.Persistance;
+using TPI_2026.Infrastructure.Persistence;
 
 #nullable disable
 
-namespace TPI_2026.Infrastructure.Migrations
+namespace TPI_2026.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260520234830_FirstMigrationAfterRefactor")]
-    partial class FirstMigrationAfterRefactor
+    [Migration("20260522235743_MoveConfigurationsToDbContext")]
+    partial class MoveConfigurationsToDbContext
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -50,7 +50,7 @@ namespace TPI_2026.Infrastructure.Migrations
 
                     b.HasIndex("RoomId");
 
-                    b.ToTable("Appointments", (string)null);
+                    b.ToTable("Appointments");
                 });
 
             modelBuilder.Entity("TPI_2026.Domain.Entities.MedicalHistory", b =>
@@ -67,7 +67,6 @@ namespace TPI_2026.Infrastructure.Migrations
 
                     b.Property<string>("Diagnostic")
                         .IsRequired()
-                        .HasMaxLength(2000)
                         .HasColumnType("TEXT");
 
                     b.Property<Guid>("PatientId")
@@ -80,7 +79,7 @@ namespace TPI_2026.Infrastructure.Migrations
 
                     b.HasIndex("PatientId");
 
-                    b.ToTable("MedicalHistories", (string)null);
+                    b.ToTable("MedicalHistories");
                 });
 
             modelBuilder.Entity("TPI_2026.Domain.Entities.Room", b =>
@@ -97,7 +96,6 @@ namespace TPI_2026.Infrastructure.Migrations
 
                     b.Property<string>("Number")
                         .IsRequired()
-                        .HasMaxLength(20)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Specialty")
@@ -108,7 +106,7 @@ namespace TPI_2026.Infrastructure.Migrations
 
                     b.HasIndex("DoctorId");
 
-                    b.ToTable("Rooms", (string)null);
+                    b.ToTable("Rooms");
                 });
 
             modelBuilder.Entity("TPI_2026.Domain.Entities.User", b =>
@@ -119,12 +117,10 @@ namespace TPI_2026.Infrastructure.Migrations
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasMaxLength(200)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(150)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Password")
@@ -145,7 +141,7 @@ namespace TPI_2026.Infrastructure.Migrations
                     b.HasIndex("Email")
                         .IsUnique();
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("User");
 
                     b.HasDiscriminator<string>("UserType").HasValue("User");
 
@@ -165,7 +161,6 @@ namespace TPI_2026.Infrastructure.Migrations
 
                     b.Property<string>("Credential")
                         .IsRequired()
-                        .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("Disponible")
@@ -195,12 +190,10 @@ namespace TPI_2026.Infrastructure.Migrations
 
                     b.Property<string>("Dni")
                         .IsRequired()
-                        .HasMaxLength(8)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
-                        .HasMaxLength(30)
                         .HasColumnType("TEXT");
 
                     b.HasIndex("Dni")

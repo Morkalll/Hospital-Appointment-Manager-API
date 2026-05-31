@@ -3,7 +3,7 @@ using MailKit.Net.Smtp; // El cartero
 using Microsoft.Extensions.Configuration;
 using TPI_2026.Application.Abstractions.Interfaces.Services;
 
-namespace TPI_2026.Infrastructure.Persistance.Services;
+namespace TPI_2026.Infrastructure.Persistence.Services;
 
 public class EmailService : IEmailService
 {
@@ -16,7 +16,7 @@ public class EmailService : IEmailService
     }
 
     public async Task SendEmailAsync(
-        string messageDestinatary,
+        string messageDestinatory,
         string messageSubject,
         string messageBody,
         CancellationToken cancellationToken = default)
@@ -29,7 +29,7 @@ public class EmailService : IEmailService
         ?? throw new InvalidOperationException("La configuración 'EmailSettings:From' es obligatoria.")));
 
         // Define el destinatario. Misma lógica que el método anterior
-        email.To.Add(MailboxAddress.Parse(messageDestinatary));
+        email.To.Add(MailboxAddress.Parse(messageDestinatory));
 
         // Define el asunto del mensaje
         email.Subject = messageSubject;
