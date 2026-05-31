@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using TPI_2026.Application;
-using TPI_2026.Infrastructure.Persistance;
+using TPI_2026.Infrastructure.Persistence;
 using TPI_2026.Presentation.Authorization;
 
 namespace TPI_2026.Presentation.Infrastructure;

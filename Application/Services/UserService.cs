@@ -70,7 +70,7 @@ public class UserService(IUnitOfWork unitOfWork, IPasswordHasher<User> hasher) :
         string dni,
         string birthDate,
         string phoneNumber,
-        string adress,
+        string address,
         CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(name))
@@ -89,10 +89,11 @@ public class UserService(IUnitOfWork unitOfWork, IPasswordHasher<User> hasher) :
         if (await unitOfWork.Patients.AnyAsync(patient => patient.Dni == dni, cancellationToken))
             throw new ForbiddenException("A patient with that DNI already exists.");
 
-        // Valida si el email ya existe en alguna de las tres tablas de usuarios.
+        // Valida si el email ya existe en alguna de las cuatro tablas de usuarios.
         if (await unitOfWork.Receptionists.AnyAsync(receptionist => receptionist.Email == email, cancellationToken) ||
             await unitOfWork.Patients.AnyAsync(patient => patient.Email == email, cancellationToken) ||
-            await unitOfWork.Doctors.AnyAsync(doctor => doctor.Email == email, cancellationToken))
+            await unitOfWork.Doctors.AnyAsync(doctor => doctor.Email == email, cancellationToken) ||
+            await unitOfWork.Administrators.AnyAsync(a => a.Email == email, cancellationToken))
         {
             throw new ForbiddenException("A user with that email already exists.");
         }
@@ -102,9 +103,9 @@ public class UserService(IUnitOfWork unitOfWork, IPasswordHasher<User> hasher) :
             Name = name,
             Email = email,
             Dni = dni,
-            BirthDate = birthDate,
+            BirthDate = DateOnly.Parse(birthDate),
             PhoneNumber = phoneNumber,
-            Adress = adress
+            Address = address
         };
         patient.Password = hasher.HashPassword(patient, password);
 
@@ -134,10 +135,11 @@ public class UserService(IUnitOfWork unitOfWork, IPasswordHasher<User> hasher) :
             throw new ForbiddenException("Credential is required.");
 
 
-        // Valida si el email ya existe en alguna de las tres tablas de usuarios.
+        // Valida si el email ya existe en alguna de las cuatro tablas de usuarios.
         if (await unitOfWork.Receptionists.AnyAsync(receptionist => receptionist.Email == email, cancellationToken) ||
             await unitOfWork.Patients.AnyAsync(patient => patient.Email == email, cancellationToken) ||
-            await unitOfWork.Doctors.AnyAsync(doctor => doctor.Email == email, cancellationToken))
+            await unitOfWork.Doctors.AnyAsync(doctor => doctor.Email == email, cancellationToken) ||
+            await unitOfWork.Administrators.AnyAsync(a => a.Email == email, cancellationToken))
         {
             throw new ForbiddenException("A user with that email already exists.");
         }
@@ -187,10 +189,11 @@ public class UserService(IUnitOfWork unitOfWork, IPasswordHasher<User> hasher) :
             throw new ForbiddenException("Area is required.");
 
 
-        // Valida si el email ya existe en alguna de las tres tablas de usuarios.
+        // Valida si el email ya existe en alguna de las cuatro tablas de usuarios.
         if (await unitOfWork.Receptionists.AnyAsync(receptionist => receptionist.Email == email, cancellationToken) ||
             await unitOfWork.Patients.AnyAsync(patient => patient.Email == email, cancellationToken) ||
-            await unitOfWork.Doctors.AnyAsync(doctor => doctor.Email == email, cancellationToken))
+            await unitOfWork.Doctors.AnyAsync(doctor => doctor.Email == email, cancellationToken) ||
+            await unitOfWork.Administrators.AnyAsync(a => a.Email == email, cancellationToken))
         {
             throw new ForbiddenException("A user with that email already exists.");
         }
@@ -234,6 +237,13 @@ public class UserService(IUnitOfWork unitOfWork, IPasswordHasher<User> hasher) :
         if (receptionist is not null)
         {
             unitOfWork.Receptionists.Remove(receptionist); await unitOfWork.SaveChangesAsync(cancellationToken);
+            return;
+        }
+
+        var admin = await unitOfWork.Administrators.GetByIdAsync(userId, cancellationToken);
+        if (admin is not null)
+        {
+            unitOfWork.Administrators.Remove(admin); await unitOfWork.SaveChangesAsync(cancellationToken);
             return;
         }
 

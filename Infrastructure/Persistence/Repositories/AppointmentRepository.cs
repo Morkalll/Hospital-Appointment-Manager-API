@@ -3,7 +3,7 @@ using TPI_2026.Application.Abstractions.Interfaces.Repositories;
 using TPI_2026.Domain.Entities;
 using TPI_2026.Domain.Enums;
 
-namespace TPI_2026.Infrastructure.Persistance.Repositories;
+namespace TPI_2026.Infrastructure.Persistence.Repositories;
 
 public class AppointmentRepository : Repository<Appointment>, IAppointmentRepository
 {

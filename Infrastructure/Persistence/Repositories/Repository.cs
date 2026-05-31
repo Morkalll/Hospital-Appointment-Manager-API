@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using TPI_2026.Application.Abstractions.Interfaces.Repositories;
 
-namespace TPI_2026.Infrastructure.Persistance.Repositories;
+namespace TPI_2026.Infrastructure.Persistence.Repositories;
 
 public class Repository<T> : IRepository<T> where T : class
 {

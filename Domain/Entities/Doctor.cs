@@ -1,5 +1,4 @@
 ﻿using TPI_2026.Domain.Enums;
-using TPI_2026.Domain.Entities;
 
 namespace TPI_2026.Domain.Entities;
 

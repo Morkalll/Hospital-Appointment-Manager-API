@@ -6,7 +6,7 @@ using Microsoft.Identity.Client;
 using System.Configuration.Internal;
 using Microsoft.Extensions.DependencyInjection; // para usar el BaseEvent
 
-namespace TPI_2026.Infrastructure.Persistance;
+namespace TPI_2026.Infrastructure.Persistence;
 
 // Pase todas las restricciones de cada clase directamente al ApplicationDbContext, asi no esta en la carpeta Configuration 
 // que el repo del profe no la tiene, aparte eso se usa para proyectos muy grandes y que el dbcontext no te quede enorme. 

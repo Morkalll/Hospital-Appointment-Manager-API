@@ -4,21 +4,21 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using TPI_2026.Infrastructure.Persistance;
+using TPI_2026.Infrastructure.Persistence;
 
 #nullable disable
 
-namespace TPI_2026.Infrastructure.Persistance.Migrations
+namespace TPI_2026.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260528194624_MigrationPreviousToEmailServiceTest")]
-    partial class MigrationPreviousToEmailServiceTest
+    [Migration("20260520234830_FirstMigrationAfterRefactor")]
+    partial class FirstMigrationAfterRefactor
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "10.0.8");
+            modelBuilder.HasAnnotation("ProductVersion", "10.0.6");
 
             modelBuilder.Entity("TPI_2026.Domain.Entities.Appointment", b =>
                 {
@@ -26,20 +26,11 @@ namespace TPI_2026.Infrastructure.Persistance.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
                     b.Property<DateTime>("DateTime")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("DeletedAt")
                         .HasColumnType("TEXT");
 
                     b.Property<Guid>("DoctorId")
                         .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("INTEGER");
 
                     b.Property<Guid>("PatientId")
                         .HasColumnType("TEXT");
@@ -51,9 +42,6 @@ namespace TPI_2026.Infrastructure.Persistance.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("TEXT");
-
                     b.HasKey("Id");
 
                     b.HasIndex("DoctorId");
@@ -62,7 +50,7 @@ namespace TPI_2026.Infrastructure.Persistance.Migrations
 
                     b.HasIndex("RoomId");
 
-                    b.ToTable("Appointments");
+                    b.ToTable("Appointments", (string)null);
                 });
 
             modelBuilder.Entity("TPI_2026.Domain.Entities.MedicalHistory", b =>
@@ -74,26 +62,15 @@ namespace TPI_2026.Infrastructure.Persistance.Migrations
                     b.Property<Guid>("AppointmentId")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
                     b.Property<DateTime>("DateTime")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("DeletedAt")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Diagnostic")
                         .IsRequired()
+                        .HasMaxLength(2000)
                         .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("INTEGER");
 
                     b.Property<Guid>("PatientId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -103,7 +80,7 @@ namespace TPI_2026.Infrastructure.Persistance.Migrations
 
                     b.HasIndex("PatientId");
 
-                    b.ToTable("MedicalHistories");
+                    b.ToTable("MedicalHistories", (string)null);
                 });
 
             modelBuilder.Entity("TPI_2026.Domain.Entities.Room", b =>
@@ -112,37 +89,26 @@ namespace TPI_2026.Infrastructure.Persistance.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("DeletedAt")
-                        .HasColumnType("TEXT");
-
                     b.Property<Guid?>("DoctorId")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Floor")
                         .HasColumnType("INTEGER");
 
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("Number")
                         .IsRequired()
+                        .HasMaxLength(20)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Specialty")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("TEXT");
-
                     b.HasKey("Id");
 
                     b.HasIndex("DoctorId");
 
-                    b.ToTable("Rooms");
+                    b.ToTable("Rooms", (string)null);
                 });
 
             modelBuilder.Entity("TPI_2026.Domain.Entities.User", b =>
@@ -151,21 +117,14 @@ namespace TPI_2026.Infrastructure.Persistance.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("DeletedAt")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("Email")
                         .IsRequired()
+                        .HasMaxLength(200)
                         .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
                         .IsRequired()
+                        .HasMaxLength(150)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Password")
@@ -174,9 +133,6 @@ namespace TPI_2026.Infrastructure.Persistance.Migrations
 
                     b.Property<string>("Role")
                         .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("UserType")
@@ -189,7 +145,7 @@ namespace TPI_2026.Infrastructure.Persistance.Migrations
                     b.HasIndex("Email")
                         .IsUnique();
 
-                    b.ToTable("User");
+                    b.ToTable("Users", (string)null);
 
                     b.HasDiscriminator<string>("UserType").HasValue("User");
 
@@ -209,9 +165,10 @@ namespace TPI_2026.Infrastructure.Persistance.Migrations
 
                     b.Property<string>("Credential")
                         .IsRequired()
+                        .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("IsAvailable")
+                    b.Property<bool>("Disponible")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Specialty")
@@ -238,10 +195,12 @@ namespace TPI_2026.Infrastructure.Persistance.Migrations
 
                     b.Property<string>("Dni")
                         .IsRequired()
+                        .HasMaxLength(8)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
+                        .HasMaxLength(30)
                         .HasColumnType("TEXT");
 
                     b.HasIndex("Dni")
@@ -254,15 +213,15 @@ namespace TPI_2026.Infrastructure.Persistance.Migrations
                 {
                     b.HasBaseType("TPI_2026.Domain.Entities.User");
 
-                    b.Property<string>("Area")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("EmployeeNumber")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("WorkingShift")
+                    b.Property<string>("Sector")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Shift")
                         .IsRequired()
                         .HasColumnType("TEXT");
 

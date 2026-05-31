@@ -30,7 +30,7 @@ namespace TPI_2026.Presentation.Controllers
             CancellationToken cancellationToken = default
         )
         {
-            var token = await _authService.LoginAsync(request.email, request.password, cancellationToken);
+            var token = await _authService.LoginAsync(request.Email, request.Password, cancellationToken);
             return Ok(new { Token = token });
         }
 
