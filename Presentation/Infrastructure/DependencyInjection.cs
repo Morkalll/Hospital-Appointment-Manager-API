@@ -8,6 +8,7 @@ public static class DependencyInjection
     {
         // Register presentation-layer services here.
         services.AddEndpointsApiExplorer();
+        services.AddAuthorizationPolicies();
 
         return services;
     }

@@ -20,7 +20,7 @@ namespace TPI_2026.Presentation.Controllers
         }
 
         [HttpGet("{patientId}")]
-        [Authorize (Policy = "Staff, DoctorOnly")]
+        [Authorize]
         public async Task<IActionResult> GetMedicalHistory(
             [FromRoute] Guid patientId,
             CancellationToken cancellationToken = default

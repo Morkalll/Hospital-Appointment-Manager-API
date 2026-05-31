@@ -52,10 +52,10 @@ public class AppointmentService(IUnitOfWork unitOfWork, ICurrentUserService curr
         var appointment = await unitOfWork.Appointments.GetByIdAsync(appointmentId, cancellationToken)
             ?? throw new NotFoundException(nameof(Appointment), appointmentId);
         
-        if (CurrentUserService.Role == "Patient" && appointment.PatientId != CurrentUserService.UserId)
+        if (currentUserService.Role == "Patient" && appointment.PatientId != currentUserService.UserId)
             throw new ForbiddenException("A patient can only cancel their own appointments.");
         
-        if (CurrentUserService.Role == "Doctor" && appointment.DoctorId != CurrentUserService.UserId)
+        if (currentUserService.Role == "Doctor" && appointment.DoctorId != currentUserService.UserId)
             throw new ForbiddenException("A doctor can only cancel their own appointments.");
 
         if (!appointment.IsCancelable())
