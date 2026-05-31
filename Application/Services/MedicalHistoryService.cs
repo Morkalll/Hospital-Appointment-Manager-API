@@ -8,7 +8,7 @@ using TPI_2026.Domain.Enums;
 
 namespace TPI_2026.Application.Services;
 
-public class MedicalHistoryService(IUnitOfWork unitOfWork) : IMedicalHistoryService
+public class MedicalHistoryService(IUnitOfWork unitOfWork, ICurrentUserService currentUserService) : IMedicalHistoryService
 {
     public async Task<Guid> AddEntryAsync(
         Guid appointmentId,
@@ -46,8 +46,11 @@ public class MedicalHistoryService(IUnitOfWork unitOfWork) : IMedicalHistoryServ
 
     public async Task<List<MedicalHistoryDto>> GetPatientByIdAsync(Guid patientId, CancellationToken cancellationToken = default)
     {
+        if (currentUserService.Role == "Patient" && currentUserService.UserId != patientId)
+            throw new ForbiddenException("Patients can only access their own medical history.");
+        
         var medicalHistories = await unitOfWork.MedicalHistories.GetByPatientIdWithDetailsAsync(patientId, cancellationToken);
-
+    
         return medicalHistories
         .Select(medicalHistory => new MedicalHistoryDto(
                 medicalHistory.Id,
