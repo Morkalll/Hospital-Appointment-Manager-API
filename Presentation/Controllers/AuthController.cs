@@ -13,7 +13,7 @@ namespace TPI_2026.Presentation.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        
+
 
         private readonly IAuthService _authService;
         public AuthController(IAuthService authService)
@@ -33,6 +33,6 @@ namespace TPI_2026.Presentation.Controllers
             var token = await _authService.LoginAsync(request.email, request.password, cancellationToken);
             return Ok(new { Token = token });
         }
-            
+
     }
 }
