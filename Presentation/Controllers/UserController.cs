@@ -9,6 +9,7 @@ using TPI_2026.Application.Requests;
 namespace TPI_2026.Presentation.Controllers
 
 {
+    
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]
@@ -19,6 +20,25 @@ namespace TPI_2026.Presentation.Controllers
         public UserController(IUserService userService)
         {
             _UserService = userService;
+        }
+        
+        
+        [HttpGet]
+        [Authorize(Policy = "AdministratorOnly")]
+        public async Task<IActionResult> GetAll(CancellationToken cancellationToken = default)
+        {
+            var users = await _UserService.GetAllAsync(cancellationToken);
+            return Ok(users);
+        }
+
+        [HttpGet("{id}")]
+        [Authorize(Policy = "AdministratorOnly")]
+        public async Task<IActionResult> GetById(
+            [FromRoute] Guid id,
+            CancellationToken cancellationToken = default)
+        {
+            var user = await _UserService.GetByIdAsync(id, cancellationToken);
+            return Ok(user);
         }
 
         [HttpPost("create-patient")]
