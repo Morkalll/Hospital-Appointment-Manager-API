@@ -19,7 +19,7 @@ public interface IUserService
         string dni,
         string birthDate,
         string phoneNumber,
-        string adress,
+        string address,
         CancellationToken cancellationToken = default);
 
     Task<Guid> RegisterDoctorAsync(

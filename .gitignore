@@ -3,6 +3,12 @@
 ##
 ## Get latest from `dotnet new gitignore`
 
+# SQLite Database
+TPI_2026.db
+TPI_2026.db-journal
+TPI_2026.db-shm
+TPI_2026.db-wal
+
 # User-specific files
 *.rsuser
 *.suo

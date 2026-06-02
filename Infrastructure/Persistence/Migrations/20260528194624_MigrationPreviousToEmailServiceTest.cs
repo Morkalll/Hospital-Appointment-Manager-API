@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace TPI_2026.Infrastructure.Persistance.Migrations
+namespace TPI_2026.Infrastructure.Persistence.Migrations
 {
     /// <inheritdoc />
     public partial class MigrationPreviousToEmailServiceTest : Migration

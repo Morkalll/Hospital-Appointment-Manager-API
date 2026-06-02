@@ -3,7 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using TPI_2026.Infrastructure.Persistance;
+using TPI_2026.Infrastructure.Persistence;
 
 #nullable disable
 
@@ -225,12 +225,11 @@ namespace TPI_2026.Infrastructure.Migrations
                 {
                     b.HasBaseType("TPI_2026.Domain.Entities.User");
 
-                    b.Property<string>("Adress")
+                    b.Property<string>("Address")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("BirthDate")
-                        .IsRequired()
+                    b.Property<DateOnly>("BirthDate")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Dni")

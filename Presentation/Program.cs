@@ -1,6 +1,6 @@
 using TPI_2026.Application;
 using TPI_2026.Infrastructure;
-using TPI_2026.Infrastructure.Persistance;
+using TPI_2026.Infrastructure.Persistence;
 using TPI_2026.Presentation.Infrastructure;
 using TPI_2026.Presentation.Middleware;
 using Scalar.AspNetCore;

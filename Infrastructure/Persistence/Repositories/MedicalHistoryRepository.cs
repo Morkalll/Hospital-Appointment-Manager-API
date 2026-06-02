@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using TPI_2026.Application.Abstractions.Interfaces.Repositories;
 using TPI_2026.Domain.Entities;
 
-namespace TPI_2026.Infrastructure.Persistance.Repositories;
+namespace TPI_2026.Infrastructure.Persistence.Repositories;
 
 public class MedicalHistoryRepository : Repository<MedicalHistory>, IMedicalHistoryRepository
 {

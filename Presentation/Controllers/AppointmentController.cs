@@ -22,7 +22,7 @@ namespace TPI_2026.Presentation.Controllers
         }
 
         [HttpPost("create-appointment")]
-        [Authorize (Policy = "Staff")]
+        [Authorize(Policy = "Staff")]
         public async Task<IActionResult> CreateAppointment(
             [FromBody] CreateAppointmentReq request,
             CancellationToken cancellationToken = default
@@ -36,11 +36,12 @@ namespace TPI_2026.Presentation.Controllers
         [Authorize]
         public async Task<IActionResult> CancelAppointment(
             [FromRoute] Guid appointmentId,
+            [FromRoute] bool isDoctor,
             [FromBody] CancelAppointmentReq request,
             CancellationToken cancellationToken = default
         )
         {
-            await _AppointmentService.CancelAsync(appointmentId, cancellationToken);
+            await _AppointmentService.CancelAsync(appointmentId, isDoctor, cancellationToken);
             return Ok();
         }
 

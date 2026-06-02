@@ -7,6 +7,6 @@ namespace TPI_2026.Application.Requests
         string Dni,
         string BirthDate,
         string PhoneNumber,
-        string Adress
+        string Address
     );
 }
