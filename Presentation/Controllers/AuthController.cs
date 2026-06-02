@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using TPI_2026.Domain.Enums;
 using TPI_2026.Application.Abstractions.Interfaces.Services;
 using TPI_2026.Application.Requests;
+using TPI_2026.Application.Responses;
 
 
 
@@ -30,8 +31,8 @@ namespace TPI_2026.Presentation.Controllers
             CancellationToken cancellationToken = default
         )
         {
-            var token = await _authService.LoginAsync(request.Email, request.Password, cancellationToken);
-            return Ok(new { Token = token });
+            AuthResponse res = await _authService.LoginAsync(request.Email, request.Password, cancellationToken);
+            return Ok(res);
         }
 
     }
