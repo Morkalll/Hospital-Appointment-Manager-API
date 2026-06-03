@@ -32,12 +32,8 @@ public class AppointmentService(IUnitOfWork unitOfWork, ICurrentUserService curr
             ?? throw new NotFoundException(nameof(Room), roomId);
 
         // Validación de si hay solapamiento de horarios con turnos ya existentes.
-        var overlaps = await unitOfWork.Appointments.AnyAsync(appointment =>
-            appointment.DoctorId == doctorId
-            && appointment.DateTime == dateTime
-            && appointment.State != AppointmentState.CanceledByDoctor
-            && appointment.State != AppointmentState.CanceledByPatient, cancellationToken);
-
+        var overlaps = await unitOfWork.Appointments.HasOverlapAsync(doctorId, dateTime, cancellationToken);
+        
         if (overlaps)
             throw new ForbiddenException("The doctor already has an appointment at that time.");
 
