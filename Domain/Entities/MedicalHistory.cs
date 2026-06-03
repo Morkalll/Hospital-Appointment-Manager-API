@@ -30,7 +30,7 @@ public class MedicalHistory : BaseEntity
     public string GetSummary()
         => $"Turno: {DateTime:dd/MM/yyyy HH:mm} | Diagnóstico: {Diagnostic}";
 
-    public void AddEntry(string diagnostic)
+    public void UpdateDiagnostic(string diagnostic)
     {
         if (!string.IsNullOrWhiteSpace(diagnostic))
             Diagnostic = diagnostic;
