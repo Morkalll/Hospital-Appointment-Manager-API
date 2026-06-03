@@ -1,12 +1,6 @@
 using System.Reflection;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using TPI_2026.Application;
 using TPI_2026.Infrastructure.Persistence;
-using TPI_2026.Presentation.Authorization;
 
 namespace TPI_2026.Presentation.Infrastructure;
 
@@ -27,29 +21,6 @@ public static class ApplicationExtensions
     public static WebApplicationBuilder AddApplicationServices(this WebApplicationBuilder builder)
     {
         builder.Services.AddApplicationServices();
-        return builder;
-    }
-
-    public static WebApplicationBuilder AddPresentationServices(this WebApplicationBuilder builder)
-    {
-        builder.Services
-            .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(options =>
-            {
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-                    ValidIssuer = builder.Configuration["Jwt:Issuer"],
-                    ValidAudience = builder.Configuration["Jwt:Audience"],
-                    IssuerSigningKey = new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
-                };
-            });
-
-        builder.Services.AddAuthorizationPolicies();
         return builder;
     }
 

@@ -10,7 +10,7 @@ namespace TPI_2026.Application.Services;
 
 public class MedicalHistoryService(IUnitOfWork unitOfWork, ICurrentUserService currentUserService) : IMedicalHistoryService
 {
-    public async Task<Guid> AddEntryAsync(
+    public async Task<Guid> UpdateDiagnosticAsync(
         Guid appointmentId,
         string diagnostic,
         CancellationToken cancellationToken = default)
@@ -30,7 +30,7 @@ public class MedicalHistoryService(IUnitOfWork unitOfWork, ICurrentUserService c
 
         if (appointment.MedicalHistory is not null)
         {
-            appointment.MedicalHistory.AddEntry(diagnostic);
+            appointment.MedicalHistory.UpdateDiagnostic(diagnostic);
             await unitOfWork.SaveChangesAsync(cancellationToken);
             return appointment.MedicalHistory.Id;
         }
@@ -48,9 +48,9 @@ public class MedicalHistoryService(IUnitOfWork unitOfWork, ICurrentUserService c
     {
         if (currentUserService.Role == "Patient" && currentUserService.UserId != patientId)
             throw new ForbiddenException("Patients can only access their own medical history.");
-        
+
         var medicalHistories = await unitOfWork.MedicalHistories.GetByPatientIdWithDetailsAsync(patientId, cancellationToken);
-    
+
         return medicalHistories
         .Select(medicalHistory => new MedicalHistoryDto(
                 medicalHistory.Id,

@@ -12,7 +12,7 @@ builder.AddKeyVaultIfConfigured();
 
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructure(builder.Configuration);
-builder.Services.AddPresentationServices();
+builder.Services.AddPresentationServices(builder.Configuration);
 builder.Services.AddControllers();
 
 var app = builder.Build();

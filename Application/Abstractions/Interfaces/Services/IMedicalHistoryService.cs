@@ -4,7 +4,7 @@ namespace TPI_2026.Application.Abstractions.Interfaces.Services;
 
 public interface IMedicalHistoryService
 {
-    Task<Guid> AddEntryAsync(
+    Task<Guid> UpdateDiagnosticAsync(
         Guid appointmentId,
         string diagnostic,
         CancellationToken ct = default);
