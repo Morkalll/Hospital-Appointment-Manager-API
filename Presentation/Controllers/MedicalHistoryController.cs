@@ -32,6 +32,19 @@ namespace TPI_2026.Presentation.Controllers
             return Ok(medicalHistory);
         }
 
-
+        [HttpPut]
+        [Authorize(Roles = "Doctor")]
+        public async Task<IActionResult> UpdateDiagnostic(
+            [FromBody] UpdateDiagnosticReq request,
+            CancellationToken cancellationToken = default
+        )
+        {
+            var medicalHistoryId = await _MedicalHistoryService.UpdateDiagnosticAsync(
+                request.AppointmentId,
+                request.Diagnostic,
+                cancellationToken
+            );
+            return Ok(new { Id = medicalHistoryId });
+        }
     }
 }
