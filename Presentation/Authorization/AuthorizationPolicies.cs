@@ -8,9 +8,6 @@ public static class AuthorizationPolicies
     {
         services.AddAuthorization(options =>
         {
-            options.AddPolicy("PatientOnly", policy => policy.RequireRole("Patient"));
-            options.AddPolicy("DoctorOnly", policy => policy.RequireRole("Doctor"));
-            options.AddPolicy("ReceptionistOnly", policy => policy.RequireRole("Receptionist"));
             options.AddPolicy("AdministratorOnly", policy => policy.RequireRole("Administrator"));
             options.AddPolicy("Staff", policy => policy.RequireRole("Receptionist", "Administrator"));
         });
