@@ -11,7 +11,7 @@ public class Appointment : BaseEntity
     public Guid DoctorId { get; private set; }
     public Guid RoomId { get; private set; }
     public DateTime DateTime { get; private set; }
-    public AppointmentState State { get; private set; } = AppointmentState.Pending;
+    public AppointmentState State { get; private set; } = AppointmentState.Confirmed;
 
     // Navigation
     public Patient? Patient { get; set; }
@@ -29,7 +29,7 @@ public class Appointment : BaseEntity
             DoctorId = doctorId,
             RoomId = roomId,
             DateTime = dateTime,
-            State = AppointmentState.Pending
+            State = AppointmentState.Confirmed
         };
 
         appointment.AddDomainEvent(new AppointmentCreatedEvent(appointment));
@@ -41,19 +41,13 @@ public class Appointment : BaseEntity
         var previousState = State;
         State = newState;
 
-        if (newState is AppointmentState.CanceledByDoctor or AppointmentState.CanceledByPatient)
-        {
-            AddDomainEvent(new AppointmentCanceledEvent(this, newState));
-        }
-        else
-        {
-            AddDomainEvent(new AppointmentChangedEvent(this, previousState));
-        }
+        AddDomainEvent(new AppointmentChangedEvent(this, previousState));
+
     }
 
     public bool IsCancelable()
-        => State is AppointmentState.Pending or AppointmentState.Confirmed;
+        => State is AppointmentState.Confirmed;
 
-    public void NotifyChange()
-        => AddDomainEvent(new AppointmentChangedEvent(this, State));
+    public bool IsCompleteable()
+    => State is AppointmentState.Confirmed;
 }

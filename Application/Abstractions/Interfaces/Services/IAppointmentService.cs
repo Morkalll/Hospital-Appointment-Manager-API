@@ -1,4 +1,3 @@
-using System.Globalization;
 using TPI_2026.Application.Responses;
 
 namespace TPI_2026.Application.Abstractions.Interfaces.Services;
@@ -15,12 +14,12 @@ public interface IAppointmentService
 
     Task CancelAsync(
         Guid appointmentId,
-        bool isDoctor,
         CancellationToken cancellationToken = default);
 
-    Task ApproveAsync(
+    Task CompletionAsync(
         Guid appointmentId,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default
+    );
 
     Task<List<AppointmentDto>> GetByPatientAsync(
         Guid patientId,
