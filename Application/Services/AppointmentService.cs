@@ -12,10 +12,10 @@ public class AppointmentService(IUnitOfWork unitOfWork) : IAppointmentService
 {
     public async Task<Guid> CreateAsync(Guid patientId, Guid doctorId, Guid roomId, DateTime dateTime, CancellationToken cancellationToken = default)
     {
-        if (patientId == Guid.Empty) throw new Exception("PatientId is required.");
-        if (doctorId == Guid.Empty) throw new Exception("DoctorId is required.");
-        if (roomId == Guid.Empty) throw new Exception("RoomId is required.");
-        if (dateTime <= DateTime.UtcNow) throw new Exception("Appointment date must be in the future.");
+        if (patientId == Guid.Empty) throw new ValidationException("PatientId is required.");
+        if (doctorId == Guid.Empty) throw new ValidationException("DoctorId is required.");
+        if (roomId == Guid.Empty) throw new ValidationException("RoomId is required.");
+        if (dateTime <= DateTime.UtcNow) throw new ValidationException("Appointment date must be in the future.");
 
         var patient = await unitOfWork.Patients.GetByIdAsync(patientId, cancellationToken)
             ?? throw new NotFoundException(nameof(Patient), patientId);
@@ -27,13 +27,13 @@ public class AppointmentService(IUnitOfWork unitOfWork) : IAppointmentService
             ?? throw new NotFoundException(nameof(Doctor), doctorId);
 
         if (!doctor.IsAvailable)
-            throw new Exception("The doctor is not available.");
+            throw new ValidationException("The doctor is not available.");
 
         // Validación de si hay solapamiento de horarios con turnos ya existentes.
         var overlaps = await unitOfWork.Appointments.HasOverlapAsync(doctorId, dateTime, cancellationToken);
 
         if (overlaps)
-            throw new Exception("The doctor already has an appointment at that time.");
+            throw new ValidationException("The doctor already has an appointment at that time.");
 
         // Se asignan las claves foráneas
         var appointment = Appointment.Create(
