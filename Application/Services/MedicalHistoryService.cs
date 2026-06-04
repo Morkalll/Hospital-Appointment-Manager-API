@@ -9,7 +9,7 @@ namespace TPI_2026.Application.Services;
 
 public class MedicalHistoryService(IUnitOfWork unitOfWork) : IMedicalHistoryService
 {
-    public async Task<Guid> UpdateDiagnosticAsync(
+    public async Task<Guid> CreateMedicalHistoryAsync(
         Guid appointmentId,
         string diagnostic,
         CancellationToken cancellationToken = default)
@@ -29,18 +29,15 @@ public class MedicalHistoryService(IUnitOfWork unitOfWork) : IMedicalHistoryServ
 
         if (appointment.MedicalHistory is not null)
         {
-            appointment.MedicalHistory.UpdateDiagnostic(diagnostic);
-            await unitOfWork.SaveChangesAsync(cancellationToken);
-            return appointment.MedicalHistory.Id;
-        }
-
-
-        var history = MedicalHistory.Create(
-            appointmentId, appointment.PatientId, diagnostic, appointment.DateTime);
-
-        unitOfWork.MedicalHistories.Add(history);
+            Id = Guid.NewGuid(),
+            AppointmentId = appointmentId,
+            Diagnostic = diagnostic,
+            DateTime = DateTime.UtcNow
+        };
+        appointment.MedicalHistory = newMedicalHistory;
         await unitOfWork.SaveChangesAsync(cancellationToken);
-        return history.Id;
+        return newMedicalHistory.Id;
+
     }
 
     public async Task<List<MedicalHistoryDto>> GetPatientByIdAsync(Guid patientId, CancellationToken cancellationToken = default)
