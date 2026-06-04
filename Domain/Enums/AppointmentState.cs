@@ -2,9 +2,7 @@ namespace TPI_2026.Domain.Enums;
 
 public enum AppointmentState
 {
-    Pending,
     Confirmed,
+    Canceled,
     Completed,
-    CanceledByPatient,
-    CanceledByDoctor
 }

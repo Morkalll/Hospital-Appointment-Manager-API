@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TPI_2026.Domain.Enums;
 using TPI_2026.Application.Abstractions.Interfaces.Services;
 using TPI_2026.Application.Requests;
 
@@ -33,28 +32,26 @@ namespace TPI_2026.Presentation.Controllers
         }
 
         [HttpPut("cancel-appointment/{appointmentId}")]
-        [Authorize]
+        [Authorize(Policy = "Staff")]
         public async Task<IActionResult> CancelAppointment(
             [FromRoute] Guid appointmentId,
-            [FromRoute] bool isDoctor,
             [FromBody] CancelAppointmentReq request,
             CancellationToken cancellationToken = default
         )
         {
-            await _AppointmentService.CancelAsync(appointmentId, isDoctor, cancellationToken);
+            await _AppointmentService.CancelAsync(appointmentId, cancellationToken);
             return Ok();
         }
 
-        [HttpPut("approve-appointment/{appointmentId}")]
+        [HttpPut("complete-appointment/{appointmentId}")]
         [Authorize(Policy = "Staff")]
-
-        public async Task<IActionResult> ApproveAppointment(
-            [FromRoute]
-            Guid appointmentId,
+        public async Task<IActionResult> CompleteAppointment(
+            [FromRoute] Guid appointmentId,
+            [FromBody] CompleteAppointmentReq request,
             CancellationToken cancellationToken = default
         )
         {
-            await _AppointmentService.ApproveAsync(appointmentId, cancellationToken);
+            await _AppointmentService.CompletionAsync(appointmentId, cancellationToken);
             return Ok();
         }
 
