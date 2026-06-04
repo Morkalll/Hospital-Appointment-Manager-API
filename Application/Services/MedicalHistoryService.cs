@@ -35,13 +35,14 @@ public class MedicalHistoryService(IUnitOfWork unitOfWork) : IMedicalHistoryServ
         {
             Id = Guid.NewGuid(),
             AppointmentId = appointmentId,
+            PatientId = appointment.PatientId,
             Diagnostic = diagnostic,
             DateTime = DateTime.UtcNow
         };
 
         // 3. Lo vinculamos al turno y guardamos en la BD
         appointment.MedicalHistory = newMedicalHistory;
-        
+
         await unitOfWork.SaveChangesAsync(cancellationToken);
         return newMedicalHistory.Id;
     }

@@ -26,6 +26,8 @@ else
     app.UseHsts();
 }
 
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+
 app.UseHttpsRedirection();
 app.UseCors(static builder =>
     builder.AllowAnyMethod()
@@ -39,8 +41,6 @@ app.UseFileServer();
 
 app.MapOpenApi();
 app.MapScalarApiReference();
-
-app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.MapControllers();
 app.MapDefaultEndpoints();
