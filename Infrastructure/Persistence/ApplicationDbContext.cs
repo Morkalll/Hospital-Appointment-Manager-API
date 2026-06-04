@@ -124,6 +124,16 @@ public class ApplicationDbContext : DbContext
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
+        /* Actualiza automáticamente UpdatedAt en toda entidad que haya sido modificada.
+        Se hace antes de guardar para que el timestamp refleje el momento exacto
+        en que se persistió el cambio. */
+        var now = DateTime.UtcNow;
+        foreach (var entry in ChangeTracker.Entries<BaseEntity>())
+        {
+            if (entry.State == EntityState.Modified)
+                entry.Entity.UpdatedAt = now;
+        }
+
         /* Se filtran las entidades que heredan de BaseEntity y que tengan algún evento pendiente
            en su lista interna DomainEvents */
         var entitiesWithEvents = ChangeTracker.Entries<BaseEntity>()

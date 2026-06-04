@@ -10,7 +10,7 @@ public class MedicalHistoryRepository : Repository<MedicalHistory>, IMedicalHist
 
     public async Task<List<MedicalHistory>> GetByPatientIdWithDetailsAsync(Guid patientId, CancellationToken cancellationToken = default)
     {
-        return await DbSet
+        return await ActiveSet
             .Where(medicalHistory => medicalHistory.PatientId == patientId)
             .Include(medicalHistory => medicalHistory.Appointment)
                 .ThenInclude(appointment => appointment!.Doctor)

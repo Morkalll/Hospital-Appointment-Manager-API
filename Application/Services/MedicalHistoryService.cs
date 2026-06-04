@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 using TPI_2026.Application.Abstractions.Interfaces.Services;
 using TPI_2026.Application.Abstractions.Interfaces.Repositories;
 using TPI_2026.Application.Exceptions;
@@ -8,7 +7,7 @@ using TPI_2026.Domain.Enums;
 
 namespace TPI_2026.Application.Services;
 
-public class MedicalHistoryService(IUnitOfWork unitOfWork, ICurrentUserService currentUserService) : IMedicalHistoryService
+public class MedicalHistoryService(IUnitOfWork unitOfWork) : IMedicalHistoryService
 {
     public async Task<Guid> UpdateDiagnosticAsync(
         Guid appointmentId,
@@ -16,17 +15,17 @@ public class MedicalHistoryService(IUnitOfWork unitOfWork, ICurrentUserService c
         CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(diagnostic))
-            throw new ForbiddenException("Diagnostic is required.");
+            throw new Exception("Diagnostic is required.");
 
         if (diagnostic.Length > 2000)
-            throw new ForbiddenException("Diagnostic cannot exceed 2000 characters.");
+            throw new Exception("Diagnostic cannot exceed 2000 characters.");
 
 
         var appointment = await unitOfWork.Appointments.GetWithMedicalHistoryAsync(appointmentId, cancellationToken)
             ?? throw new NotFoundException(nameof(Appointment), appointmentId);
 
         if (appointment.State != AppointmentState.Confirmed)
-            throw new ForbiddenException("Medical history can only be added to confirmed appointments.");
+            throw new Exception("Medical history can only be added to confirmed appointments.");
 
         if (appointment.MedicalHistory is not null)
         {
@@ -46,9 +45,6 @@ public class MedicalHistoryService(IUnitOfWork unitOfWork, ICurrentUserService c
 
     public async Task<List<MedicalHistoryDto>> GetPatientByIdAsync(Guid patientId, CancellationToken cancellationToken = default)
     {
-        if (currentUserService.Role == "Patient" && currentUserService.UserId != patientId)
-            throw new ForbiddenException("Patients can only access their own medical history.");
-
         var medicalHistories = await unitOfWork.MedicalHistories.GetByPatientIdWithDetailsAsync(patientId, cancellationToken);
 
         return medicalHistories
