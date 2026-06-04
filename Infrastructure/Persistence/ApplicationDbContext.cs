@@ -2,8 +2,6 @@
 using TPI_2026.Domain.Entities;
 using TPI_2026.Domain.Common;
 using TPI_2026.Application.Abstractions.Interfaces.Events;
-using Microsoft.Identity.Client;
-using System.Configuration.Internal;
 using Microsoft.Extensions.DependencyInjection; // para usar el BaseEvent
 
 namespace TPI_2026.Infrastructure.Persistence;

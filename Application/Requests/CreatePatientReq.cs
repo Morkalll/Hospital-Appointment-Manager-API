@@ -5,7 +5,7 @@ namespace TPI_2026.Application.Requests
         string Email,
         string Password,
         string Dni,
-        string BirthDate,
+        DateOnly BirthDate,
         string PhoneNumber,
         string Address
     );

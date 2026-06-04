@@ -22,13 +22,13 @@ public class SendEmailOnAppointmentCanceledHandler : IEventHandler<AppointmentCa
 
         if (patient == null || string.IsNullOrEmpty(patient.Email)) return;
 
-        var asunto = "Cancelación de Turno Médico";
-        var cuerpo = $"Hola {patient.Name},\n\n" +
+        var subject = "Cancelación de Turno Médico";
+        var body= $"Hola {patient.Name},\n\n" +
                      $"Le informamos que el turno programado para el día {appointment.DateTime:dd/MM/yyyy HH:mm} " +
                      $"con el/la Dr/a. {doctor?.Name} ha sido cancelado.\n\n" +
                      $"Si esto fue un error o desea reprogramar, por favor póngase en contacto con la clínica.\n\n" +
                      $"Saludos,\nAdministración de la Clínica.";
 
-        await _emailService.SendEmailAsync(patient.Email, asunto, cuerpo);
+        await _emailService.SendEmailAsync(patient.Email, subject, body);
     }
 }
