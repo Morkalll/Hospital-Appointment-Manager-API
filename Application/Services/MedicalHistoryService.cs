@@ -1,6 +1,6 @@
 using TPI_2026.Application.Abstractions.Interfaces.Services;
 using TPI_2026.Application.Abstractions.Interfaces.Repositories;
-using TPI_2026.Application.Exceptions;
+using TPI_2026.Application.Exceptions; 
 using TPI_2026.Application.Responses;
 using TPI_2026.Domain.Entities;
 using TPI_2026.Domain.Enums;
@@ -14,23 +14,22 @@ public class MedicalHistoryService(IUnitOfWork unitOfWork) : IMedicalHistoryServ
         string diagnostic,
         CancellationToken cancellationToken = default)
     {
+        
         if (string.IsNullOrWhiteSpace(diagnostic))
-            throw new Exception("Diagnostic is required.");
+            throw new ValidationException("Diagnostic is required.");
 
         if (diagnostic.Length > 2000)
-            throw new Exception("Diagnostic cannot exceed 2000 characters.");
+            throw new ValidationException("Diagnostic cannot exceed 2000 characters.");
 
         var appointment = await unitOfWork.Appointments.GetWithMedicalHistoryAsync(appointmentId, cancellationToken)
             ?? throw new NotFoundException(nameof(Appointment), appointmentId);
 
         if (appointment.State != AppointmentState.Confirmed)
-            throw new Exception("Medical history can only be added to confirmed appointments.");
+            throw new ValidationException("Medical history can only be added to confirmed appointments.");
 
-        // 1. Si YA TIENE una historia clínica, arrojamos un error para no pisarla
         if (appointment.MedicalHistory is not null)
-            throw new Exception("A medical history already exists for this appointment.");
+            throw new ValidationException("A medical history already exists for this appointment.");
 
-        // 2. Creamos la nueva instancia correctamente asignándola a una variable
         var newMedicalHistory = new MedicalHistory
         {
             Id = Guid.NewGuid(),
@@ -40,14 +39,16 @@ public class MedicalHistoryService(IUnitOfWork unitOfWork) : IMedicalHistoryServ
             DateTime = DateTime.UtcNow
         };
 
-        // 3. Lo vinculamos al turno y guardamos en la BD
         appointment.MedicalHistory = newMedicalHistory;
 
+        unitOfWork.MedicalHistories.Add(newMedicalHistory);
+
         await unitOfWork.SaveChangesAsync(cancellationToken);
+
         return newMedicalHistory.Id;
     }
 
-    public async Task<List<MedicalHistoryDto>> GetPatientByIdAsync(Guid patientId, CancellationToken cancellationToken = default)
+    public async Task<List<MedicalHistoryDto>> GetPatientMedicalHistoriesAsync(Guid patientId, CancellationToken cancellationToken = default)
     {
         var medicalHistories = await unitOfWork.MedicalHistories.GetByPatientIdWithDetailsAsync(patientId, cancellationToken);
 

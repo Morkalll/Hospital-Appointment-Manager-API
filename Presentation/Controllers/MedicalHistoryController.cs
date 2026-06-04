@@ -28,7 +28,7 @@ namespace TPI_2026.Presentation.Controllers
             CancellationToken cancellationToken = default
         )
         {
-            var medicalHistory = await _medicalHistoryService.GetPatientByIdAsync(patientId, cancellationToken);
+            var medicalHistory = await _medicalHistoryService.GetPatientMedicalHistoriesAsync(patientId, cancellationToken);
             return Ok(medicalHistory);
         }
 
