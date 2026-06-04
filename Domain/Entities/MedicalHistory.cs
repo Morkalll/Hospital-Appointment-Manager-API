@@ -18,10 +18,5 @@ public class MedicalHistory : BaseEntity
 
     public string GetSummary()
         => $"Turno: {DateTime:dd/MM/yyyy HH:mm} | Diagnóstico: {Diagnostic}";
-
-    public void CreateMedicalHistoryAsync(string diagnostic)
-    {
-        throw new NotImplementedException();
-    }
 }
 

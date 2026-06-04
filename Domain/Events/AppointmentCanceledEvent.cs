@@ -7,11 +7,9 @@ namespace TPI_2026.Domain.Events;
 public class AppointmentCanceledEvent : BaseEvent
 {
     public Appointment Appointment { get; }
-    public AppointmentState CanceledByState { get; }
 
-    public AppointmentCanceledEvent(Appointment appointment, AppointmentState canceledByState)
+    public AppointmentCanceledEvent(Appointment appointment)
     {
         Appointment = appointment;
-        CanceledByState = canceledByState;
     }
 }

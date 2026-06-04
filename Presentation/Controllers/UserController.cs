@@ -9,25 +9,25 @@ using TPI_2026.Application.Requests;
 namespace TPI_2026.Presentation.Controllers
 
 {
-    
+
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly IUserService _UserService;
+        private readonly IUserService _userService;
 
         public UserController(IUserService userService)
         {
-            _UserService = userService;
+            _userService = userService;
         }
-        
-        
+
+
         [HttpGet]
         [Authorize(Policy = "AdministratorOnly")]
         public async Task<IActionResult> GetAll(CancellationToken cancellationToken = default)
         {
-            var users = await _UserService.GetAllAsync(cancellationToken);
+            var users = await _userService.GetAllAsync(cancellationToken);
             return Ok(users);
         }
 
@@ -37,7 +37,7 @@ namespace TPI_2026.Presentation.Controllers
             [FromRoute] Guid id,
             CancellationToken cancellationToken = default)
         {
-            var user = await _UserService.GetByIdAsync(id, cancellationToken);
+            var user = await _userService.GetByIdAsync(id, cancellationToken);
             return Ok(user);
         }
 
@@ -48,7 +48,7 @@ namespace TPI_2026.Presentation.Controllers
             CancellationToken cancellationToken = default
         )
         {
-            var patientId = await _UserService.RegisterPatientAsync(request.Name, request.Email, request.Password, request.Dni, request.BirthDate, request.PhoneNumber, request.Address, cancellationToken);
+            var patientId = await _userService.RegisterPatientAsync(request.Name, request.Email, request.Password, request.Dni, request.BirthDate, request.PhoneNumber, request.Address, cancellationToken);
             return Ok(new { Id = patientId });
         }
 
@@ -59,7 +59,7 @@ namespace TPI_2026.Presentation.Controllers
             CancellationToken cancellationToken = default
         )
         {
-            var doctorId = await _UserService.RegisterDoctorAsync(request.Name, request.Email, request.Password, request.Credential, request.Specialty, cancellationToken);
+            var doctorId = await _userService.RegisterDoctorAsync(request.Name, request.Email, request.Password, request.Credential, request.Specialty, cancellationToken);
             return Ok(new { Id = doctorId });
         }
 
@@ -70,7 +70,7 @@ namespace TPI_2026.Presentation.Controllers
             CancellationToken cancellationToken = default
         )
         {
-            var receptionistId = await _UserService.RegisterReceptionistAsync(request.Name, request.Email, request.Password, request.EmployeeNumber, request.WorkingShift, request.Area, cancellationToken);
+            var receptionistId = await _userService.RegisterReceptionistAsync(request.Name, request.Email, request.Password, request.EmployeeNumber, request.WorkingShift, request.Area, cancellationToken);
             return Ok(new { Id = receptionistId });
         }
 
@@ -80,7 +80,7 @@ namespace TPI_2026.Presentation.Controllers
             [FromRoute] Guid id,
             CancellationToken cancellationToken = default)
         {
-            await _UserService.DeleteAsync(id, cancellationToken);
+            await _userService.DeleteAsync(id, cancellationToken);
             return Ok(new { Message = "User deleted successfully." });
         }
     }

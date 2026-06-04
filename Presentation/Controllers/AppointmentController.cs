@@ -13,11 +13,11 @@ namespace TPI_2026.Presentation.Controllers
     [ApiController]
     public class AppointmentController : ControllerBase
     {
-        private readonly IAppointmentService _AppointmentService;
+        private readonly IAppointmentService _appointmentService;
 
         public AppointmentController(IAppointmentService AppointmentService)
         {
-            _AppointmentService = AppointmentService;
+            _appointmentService = AppointmentService;
         }
 
         [HttpPost("create-appointment")]
@@ -27,7 +27,7 @@ namespace TPI_2026.Presentation.Controllers
             CancellationToken cancellationToken = default
         )
         {
-            var appointmentId = await _AppointmentService.CreateAsync(request.PatientId, request.DoctorId, request.RoomId, request.DateTime, cancellationToken);
+            var appointmentId = await _appointmentService.CreateAsync(request.PatientId, request.DoctorId, request.RoomId, request.DateTime, cancellationToken);
             return Ok(new { Id = appointmentId });
         }
 
@@ -39,7 +39,7 @@ namespace TPI_2026.Presentation.Controllers
             CancellationToken cancellationToken = default
         )
         {
-            await _AppointmentService.CancelAsync(appointmentId, cancellationToken);
+            await _appointmentService.CancelAsync(appointmentId, cancellationToken);
             return Ok();
         }
 
@@ -51,7 +51,7 @@ namespace TPI_2026.Presentation.Controllers
             CancellationToken cancellationToken = default
         )
         {
-            await _AppointmentService.CompletionAsync(appointmentId, cancellationToken);
+            await _appointmentService.CompletionAsync(appointmentId, cancellationToken);
             return Ok();
         }
 
@@ -63,7 +63,7 @@ namespace TPI_2026.Presentation.Controllers
             CancellationToken cancellationToken = default
         )
         {
-            var appointments = await _AppointmentService.GetByPatientAsync(patientId, cancellationToken);
+            var appointments = await _appointmentService.GetByPatientAsync(patientId, cancellationToken);
             return Ok(appointments);
         }
     }
