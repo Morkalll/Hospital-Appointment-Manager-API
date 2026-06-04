@@ -17,7 +17,7 @@ public interface IUserService
         string email,
         string password,
         string dni,
-        string birthDate,
+        DateOnly birthDate,
         string phoneNumber,
         string address,
         CancellationToken cancellationToken = default);

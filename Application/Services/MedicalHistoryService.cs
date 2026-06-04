@@ -20,24 +20,30 @@ public class MedicalHistoryService(IUnitOfWork unitOfWork) : IMedicalHistoryServ
         if (diagnostic.Length > 2000)
             throw new Exception("Diagnostic cannot exceed 2000 characters.");
 
-
         var appointment = await unitOfWork.Appointments.GetWithMedicalHistoryAsync(appointmentId, cancellationToken)
             ?? throw new NotFoundException(nameof(Appointment), appointmentId);
 
         if (appointment.State != AppointmentState.Confirmed)
             throw new Exception("Medical history can only be added to confirmed appointments.");
 
+        // 1. Si YA TIENE una historia clínica, arrojamos un error para no pisarla
         if (appointment.MedicalHistory is not null)
+            throw new Exception("A medical history already exists for this appointment.");
+
+        // 2. Creamos la nueva instancia correctamente asignándola a una variable
+        var newMedicalHistory = new MedicalHistory
         {
             Id = Guid.NewGuid(),
             AppointmentId = appointmentId,
             Diagnostic = diagnostic,
             DateTime = DateTime.UtcNow
         };
+
+        // 3. Lo vinculamos al turno y guardamos en la BD
         appointment.MedicalHistory = newMedicalHistory;
+        
         await unitOfWork.SaveChangesAsync(cancellationToken);
         return newMedicalHistory.Id;
-
     }
 
     public async Task<List<MedicalHistoryDto>> GetPatientByIdAsync(Guid patientId, CancellationToken cancellationToken = default)

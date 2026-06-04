@@ -68,7 +68,7 @@ public class UserService(IUnitOfWork unitOfWork, IPasswordHasher<User> hasher) :
         string email,
         string password,
         string dni,
-        string birthDate,
+        DateOnly birthDate,
         string phoneNumber,
         string address,
         CancellationToken cancellationToken = default)
@@ -103,7 +103,7 @@ public class UserService(IUnitOfWork unitOfWork, IPasswordHasher<User> hasher) :
             Name = name,
             Email = email,
             Dni = dni,
-            BirthDate = DateOnly.Parse(birthDate),
+            BirthDate = birthDate,
             PhoneNumber = phoneNumber,
             Address = address
         };
