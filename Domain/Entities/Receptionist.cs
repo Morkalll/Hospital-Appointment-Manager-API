@@ -4,11 +4,9 @@ namespace TPI_2026.Domain.Entities;
 
 public class Receptionist : User
 {
-    public string Password { get; set; } = string.Empty;
     public string EmployeeNumber { get; set; } = string.Empty;
     public string WorkingShift { get; set; } = string.Empty;
     public string Area { get; set; } = string.Empty;
-    public UserRole Role { get; protected set; }
 
     public Receptionist() { Role = UserRole.Receptionist; }
 }
