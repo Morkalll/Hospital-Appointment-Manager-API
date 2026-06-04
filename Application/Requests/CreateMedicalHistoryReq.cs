@@ -1,6 +1,6 @@
 namespace TPI_2026.Application.Requests
 {
-    public record UpdateDiagnosticReq(
+    public record CreateMedicalHistoryReq(
         Guid AppointmentId,
         string Diagnostic
     );

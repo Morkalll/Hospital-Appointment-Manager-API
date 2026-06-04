@@ -10,38 +10,35 @@ namespace TPI_2026.Application.Services;
 
 public class MedicalHistoryService(IUnitOfWork unitOfWork, ICurrentUserService currentUserService) : IMedicalHistoryService
 {
-    public async Task<Guid> UpdateDiagnosticAsync(
+    public async Task<Guid> CreateMedicalHistoryAsync(
         Guid appointmentId,
         string diagnostic,
         CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(diagnostic))
-            throw new ForbiddenException("Diagnostic is required.");
+            throw new Exception("Diagnostic is required.");
 
         if (diagnostic.Length > 2000)
-            throw new ForbiddenException("Diagnostic cannot exceed 2000 characters.");
+            throw new Exception("Diagnostic cannot exceed 2000 characters.");
 
 
         var appointment = await unitOfWork.Appointments.GetWithMedicalHistoryAsync(appointmentId, cancellationToken)
             ?? throw new NotFoundException(nameof(Appointment), appointmentId);
 
         if (appointment.State != AppointmentState.Confirmed)
-            throw new ForbiddenException("Medical history can only be added to confirmed appointments.");
-
-        if (appointment.MedicalHistory is not null)
+            throw new Exception("Medical history can only be added to confirmed appointments.");
+            
+        var newMedicalHistory = new MedicalHistory
         {
-            appointment.MedicalHistory.UpdateDiagnostic(diagnostic);
-            await unitOfWork.SaveChangesAsync(cancellationToken);
-            return appointment.MedicalHistory.Id;
-        }
-
-
-        var history = MedicalHistory.Create(
-            appointmentId, appointment.PatientId, diagnostic, appointment.DateTime);
-
-        unitOfWork.MedicalHistories.Add(history);
+            Id = Guid.NewGuid(),
+            AppointmentId = appointmentId,
+            Diagnostic = diagnostic,
+            DateTime = DateTime.UtcNow
+        };
+        appointment.MedicalHistory = newMedicalHistory;
         await unitOfWork.SaveChangesAsync(cancellationToken);
-        return history.Id;
+        return newMedicalHistory.Id;
+
     }
 
     public async Task<List<MedicalHistoryDto>> GetPatientByIdAsync(Guid patientId, CancellationToken cancellationToken = default)
