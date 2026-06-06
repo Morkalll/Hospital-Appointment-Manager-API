@@ -9,6 +9,15 @@ public class AppointmentRepository : Repository<Appointment>, IAppointmentReposi
 {
     public AppointmentRepository(DbContext dbContext) : base(dbContext) { }
 
+    public override async Task<Appointment?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        return await ActiveSet
+            .Include(appointment => appointment.Patient)
+            .Include(appointment => appointment.Doctor)
+            .FirstOrDefaultAsync(appointment => appointment.Id == id, cancellationToken);
+    }
+
+
     public async Task<Appointment?> GetWithMedicalHistoryAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return await ActiveSet
