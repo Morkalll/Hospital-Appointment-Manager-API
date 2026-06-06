@@ -35,7 +35,6 @@ namespace TPI_2026.Presentation.Controllers
         [Authorize(Policy = "Staff")]
         public async Task<IActionResult> CancelAppointment(
             [FromRoute] Guid appointmentId,
-            [FromBody] CancelAppointmentReq request,
             CancellationToken cancellationToken = default
         )
         {
@@ -47,7 +46,6 @@ namespace TPI_2026.Presentation.Controllers
         [Authorize(Policy = "StaffAndDoctor")]
         public async Task<IActionResult> CompleteAppointment(
             [FromRoute] Guid appointmentId,
-            [FromBody] CompleteAppointmentReq request,
             CancellationToken cancellationToken = default
         )
         {

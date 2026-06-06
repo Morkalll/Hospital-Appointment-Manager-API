@@ -17,7 +17,6 @@ public static class DependencyInjection
         services.AddScoped<IAuthService, AuthService>();
         services.AddTransient<IEventHandler<AppointmentCreatedEvent>, SendEmailOnAppointmentCreatedHandler>();
         services.AddTransient<IEventHandler<AppointmentCanceledEvent>, SendEmailOnAppointmentCanceledHandler>();
-        services.AddTransient<IEventHandler<AppointmentChangedEvent>, SendEmailOnAppointmentChangedHandler>();
         return services;
     }
 }
