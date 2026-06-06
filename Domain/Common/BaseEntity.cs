@@ -33,6 +33,7 @@ public abstract class BaseEntity
     public void SoftDelete(DateTime utcNow)
     {
         IsDeleted = true;
+        UpdatedAt = utcNow;
         DeletedAt = utcNow;
     }
 

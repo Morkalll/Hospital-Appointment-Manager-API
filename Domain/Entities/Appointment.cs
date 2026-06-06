@@ -43,6 +43,8 @@ public class Appointment : BaseEntity
 
         AddDomainEvent(new AppointmentChangedEvent(this, previousState));
 
+        if (newState == AppointmentState.Canceled)
+            AddDomainEvent(new AppointmentCanceledEvent(this));
     }
 
     public bool IsCancelable()

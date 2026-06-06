@@ -29,6 +29,9 @@ public class AppointmentService(IUnitOfWork unitOfWork) : IAppointmentService
         if (!doctor.IsAvailable)
             throw new ValidationException("The doctor is not available.");
 
+        if (doctor.Specialty != room.Specialty)
+            throw new ValidationException("The doctor's specialty does not match with the room's specialty.");
+
         // Validación de si hay solapamiento de horarios con turnos ya existentes.
         var overlaps = await unitOfWork.Appointments.HasOverlapAsync(doctorId, dateTime, cancellationToken);
 

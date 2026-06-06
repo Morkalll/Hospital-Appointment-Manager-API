@@ -10,6 +10,9 @@ public static class AuthorizationPolicies
         {
             options.AddPolicy("AdministratorOnly", policy => policy.RequireRole("Administrator"));
             options.AddPolicy("Staff", policy => policy.RequireRole("Receptionist", "Administrator"));
+            options.AddPolicy("StaffAndDoctor", policy => policy.RequireRole("Receptionist", "Administrator", "Doctor"));
+
         });
     }
+
 }

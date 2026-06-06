@@ -44,7 +44,7 @@ namespace TPI_2026.Presentation.Controllers
         }
 
         [HttpPut("complete-appointment/{appointmentId}")]
-        [Authorize(Policy = "Staff")]
+        [Authorize(Policy = "StaffAndDoctor")]
         public async Task<IActionResult> CompleteAppointment(
             [FromRoute] Guid appointmentId,
             [FromBody] CompleteAppointmentReq request,
