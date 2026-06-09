@@ -25,7 +25,7 @@ public static class DependencyInjection
         services.AddScoped<DbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<ApplicationDbContextInitialiser>();
-        services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+        services.AddScoped<IPasswordHasher<User>, BCryptPasswordHasher<User>>();
 
         services.AddTransient<IEmailService, EmailService>();
 
