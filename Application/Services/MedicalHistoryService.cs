@@ -24,7 +24,7 @@ public class MedicalHistoryService(IUnitOfWork unitOfWork) : IMedicalHistoryServ
         var appointment = await unitOfWork.Appointments.GetWithMedicalHistoryAsync(appointmentId, cancellationToken)
             ?? throw new NotFoundException(nameof(Appointment), appointmentId);
 
-        if (appointment.State != AppointmentState.Confirmed)
+        if (appointment.State != AppointmentState.Completedg)
             throw new ValidationException("Medical history can only be added to confirmed appointments.");
 
         if (appointment.MedicalHistory is not null)
