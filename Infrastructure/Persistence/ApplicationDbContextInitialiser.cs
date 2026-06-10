@@ -58,5 +58,23 @@ public class ApplicationDbContextInitialiser
             await context.SaveChangesAsync();
             logger.LogInformation("Initial admin created.");
         }
+
+
+        if (!context.Rooms.Any())
+        {  
+            var now = DateTime.UtcNow;
+            var rooms = new List<Room>
+            {
+                new Room { Number = "101", Floor = 1, Specialty = Specialty.Cardiology, CreatedAt = now, UpdatedAt = now },
+                new Room { Number = "102", Floor = 1, Specialty = Specialty.Clinic, CreatedAt = now, UpdatedAt = now },
+                new Room { Number = "103", Floor = 2, Specialty = Specialty.Pediatrics, CreatedAt = now, UpdatedAt = now },
+                new Room { Number = "104", Floor = 2, Specialty = Specialty.Neurology, CreatedAt = now, UpdatedAt = now },
+                new Room { Number = "105", Floor = 3, Specialty = Specialty.Traumatology, CreatedAt = now, UpdatedAt = now },
+        };
+
+        context.Rooms.AddRange(rooms);
+        await context.SaveChangesAsync();
+        logger.LogInformation("Initial rooms created.");
+        }
     }
 }
