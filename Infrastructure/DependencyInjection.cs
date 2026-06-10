@@ -10,6 +10,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Identity;
+using System.Net.Http.Headers;
+using Polly;
+using Polly.Extensions.Http;
 
 namespace TPI_2026.Infrastructure;
 
@@ -26,6 +29,20 @@ public static class DependencyInjection
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<ApplicationDbContextInitialiser>();
         services.AddScoped<IPasswordHasher<User>, BCryptPasswordHasher<User>>();
+
+        services.AddHttpClient("ResendClient", client =>
+        {
+            client.BaseAddress = new Uri("https://api.resend.com/");
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", configuration["EmailSettings:ApiKey"]);
+        })
+        .AddPolicyHandler(HttpPolicyExtensions
+            .HandleTransientHttpError()
+            .OrResult(msg => msg.StatusCode == System.Net.HttpStatusCode.NotFound)
+            .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))))
+        .AddPolicyHandler(HttpPolicyExtensions
+            .HandleTransientHttpError()
+            .OrResult(msg => msg.StatusCode == System.Net.HttpStatusCode.NotFound)
+            .CircuitBreakerAsync(5, TimeSpan.FromSeconds(30)));
 
         services.AddTransient<IEmailService, EmailService>();
 

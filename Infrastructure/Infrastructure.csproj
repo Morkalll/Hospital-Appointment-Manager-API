@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <RootNamespace>TPI_2026.Infrastructure</RootNamespace>
@@ -7,13 +7,12 @@
 
   <ItemGroup>
   <PackageReference Include="BCrypt.Net-Next" />
-  <PackageReference Include="MailKit" />
   <PackageReference Include="Microsoft.EntityFrameworkCore" />
   <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" />
   <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
   <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
   <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
-  <PackageReference Include="MimeKit" />
+  <PackageReference Include="Microsoft.Extensions.Http.Polly" />
   </ItemGroup>
 
   <ItemGroup>
