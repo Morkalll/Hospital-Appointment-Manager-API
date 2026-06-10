@@ -496,3 +496,6 @@ $RECYCLE.BIN/
 *.db
 *.db-shm
 *.db-wal
+
+# Local secrets
+appsettings.Development.json
