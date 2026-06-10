@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TPI_2026.Domain.Enums;
 using TPI_2026.Application.Abstractions.Interfaces.Services;
 using TPI_2026.Application.Requests;
 
@@ -14,11 +13,11 @@ namespace TPI_2026.Presentation.Controllers
     [ApiController]
     public class AppointmentController : ControllerBase
     {
-        private readonly IAppointmentService _AppointmentService;
+        private readonly IAppointmentService _appointmentService;
 
         public AppointmentController(IAppointmentService AppointmentService)
         {
-            _AppointmentService = AppointmentService;
+            _appointmentService = AppointmentService;
         }
 
         [HttpPost("create-appointment")]
@@ -28,33 +27,29 @@ namespace TPI_2026.Presentation.Controllers
             CancellationToken cancellationToken = default
         )
         {
-            var appointmentId = await _AppointmentService.CreateAsync(request.PatientId, request.DoctorId, request.RoomId, request.DateTime, cancellationToken);
+            var appointmentId = await _appointmentService.CreateAsync(request.PatientId, request.DoctorId, request.RoomId, request.DateTime, cancellationToken);
             return Ok(new { Id = appointmentId });
         }
 
         [HttpPut("cancel-appointment/{appointmentId}")]
-        [Authorize]
+        [Authorize(Policy = "Staff")]
         public async Task<IActionResult> CancelAppointment(
             [FromRoute] Guid appointmentId,
-            [FromRoute] bool isDoctor,
-            [FromBody] CancelAppointmentReq request,
             CancellationToken cancellationToken = default
         )
         {
-            await _AppointmentService.CancelAsync(appointmentId, isDoctor, cancellationToken);
+            await _appointmentService.CancelAsync(appointmentId, cancellationToken);
             return Ok();
         }
 
-        [HttpPut("approve-appointment/{appointmentId}")]
-        [Authorize(Policy = "Staff")]
-
-        public async Task<IActionResult> ApproveAppointment(
-            [FromRoute]
-            Guid appointmentId,
+        [HttpPut("complete-appointment/{appointmentId}")]
+        [Authorize(Policy = "StaffAndDoctor")]
+        public async Task<IActionResult> CompleteAppointment(
+            [FromRoute] Guid appointmentId,
             CancellationToken cancellationToken = default
         )
         {
-            await _AppointmentService.ApproveAsync(appointmentId, cancellationToken);
+            await _appointmentService.CompletionAsync(appointmentId, cancellationToken);
             return Ok();
         }
 
@@ -66,7 +61,7 @@ namespace TPI_2026.Presentation.Controllers
             CancellationToken cancellationToken = default
         )
         {
-            var appointments = await _AppointmentService.GetByPatientAsync(patientId, cancellationToken);
+            var appointments = await _appointmentService.GetByPatientAsync(patientId, cancellationToken);
             return Ok(appointments);
         }
     }

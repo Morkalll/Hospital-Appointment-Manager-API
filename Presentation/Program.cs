@@ -12,7 +12,7 @@ builder.AddKeyVaultIfConfigured();
 
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructure(builder.Configuration);
-builder.Services.AddPresentationServices();
+builder.Services.AddPresentationServices(builder.Configuration);
 builder.Services.AddControllers();
 
 var app = builder.Build();
@@ -25,6 +25,8 @@ else
 {
     app.UseHsts();
 }
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseHttpsRedirection();
 app.UseCors(static builder =>
@@ -39,8 +41,6 @@ app.UseFileServer();
 
 app.MapOpenApi();
 app.MapScalarApiReference();
-
-app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.MapControllers();
 app.MapDefaultEndpoints();

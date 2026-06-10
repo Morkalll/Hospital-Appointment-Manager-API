@@ -68,34 +68,26 @@ public class UserService(IUnitOfWork unitOfWork, IPasswordHasher<User> hasher) :
         string email,
         string password,
         string dni,
-        string birthDate,
+        DateOnly birthDate,
         string phoneNumber,
         string address,
         CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(name))
-            throw new ForbiddenException("Name is required.");
-
-        if (string.IsNullOrWhiteSpace(email))
-            throw new ForbiddenException("Email is required.");
-
-        if (string.IsNullOrWhiteSpace(password))
-            throw new ForbiddenException("Password is required.");
-
-        if (string.IsNullOrWhiteSpace(dni))
-            throw new ForbiddenException("DNI is required.");
-
+        if (string.IsNullOrWhiteSpace(name)) throw new ValidationException("Name is required.");
+        if (string.IsNullOrWhiteSpace(email)) throw new ValidationException("Email is required.");
+        if (string.IsNullOrWhiteSpace(password)) throw new ValidationException("Password is required.");
+        if (string.IsNullOrWhiteSpace(dni)) throw new ValidationException("DNI is required.");
 
         if (await unitOfWork.Patients.AnyAsync(patient => patient.Dni == dni, cancellationToken))
-            throw new ForbiddenException("A patient with that DNI already exists.");
+            throw new ValidationException("A patient with that DNI already exists.");
 
-        // Valida si el email ya existe en alguna de las cuatro tablas de usuarios.
-        if (await unitOfWork.Receptionists.AnyAsync(receptionist => receptionist.Email == email, cancellationToken) ||
-            await unitOfWork.Patients.AnyAsync(patient => patient.Email == email, cancellationToken) ||
-            await unitOfWork.Doctors.AnyAsync(doctor => doctor.Email == email, cancellationToken) ||
+
+        if (await unitOfWork.Patients.AnyAsync(p => p.Email == email, cancellationToken) ||
+            await unitOfWork.Doctors.AnyAsync(d => d.Email == email, cancellationToken) ||
+            await unitOfWork.Receptionists.AnyAsync(r => r.Email == email, cancellationToken) ||
             await unitOfWork.Administrators.AnyAsync(a => a.Email == email, cancellationToken))
         {
-            throw new ForbiddenException("A user with that email already exists.");
+            throw new ValidationException("A user with that email already exists.");
         }
 
         var patient = new Patient
@@ -103,7 +95,7 @@ public class UserService(IUnitOfWork unitOfWork, IPasswordHasher<User> hasher) :
             Name = name,
             Email = email,
             Dni = dni,
-            BirthDate = DateOnly.Parse(birthDate),
+            BirthDate = birthDate,
             PhoneNumber = phoneNumber,
             Address = address
         };
@@ -122,30 +114,21 @@ public class UserService(IUnitOfWork unitOfWork, IPasswordHasher<User> hasher) :
         Specialty specialty,
         CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(name))
-            throw new ForbiddenException("Name is required.");
+        if (string.IsNullOrWhiteSpace(name)) throw new ValidationException("Name is required.");
+        if (string.IsNullOrWhiteSpace(email)) throw new ValidationException("Email is required.");
+        if (string.IsNullOrWhiteSpace(password)) throw new ValidationException("Password is required.");
+        if (string.IsNullOrWhiteSpace(credential)) throw new ValidationException("Credential is required.");
 
-        if (string.IsNullOrWhiteSpace(email))
-            throw new ForbiddenException("Email is required.");
-
-        if (string.IsNullOrWhiteSpace(password))
-            throw new ForbiddenException("Password is required.");
-
-        if (string.IsNullOrWhiteSpace(credential))
-            throw new ForbiddenException("Credential is required.");
-
-
-        // Valida si el email ya existe en alguna de las cuatro tablas de usuarios.
-        if (await unitOfWork.Receptionists.AnyAsync(receptionist => receptionist.Email == email, cancellationToken) ||
-            await unitOfWork.Patients.AnyAsync(patient => patient.Email == email, cancellationToken) ||
-            await unitOfWork.Doctors.AnyAsync(doctor => doctor.Email == email, cancellationToken) ||
+        if (await unitOfWork.Patients.AnyAsync(p => p.Email == email, cancellationToken) ||
+            await unitOfWork.Doctors.AnyAsync(d => d.Email == email, cancellationToken) ||
+            await unitOfWork.Receptionists.AnyAsync(r => r.Email == email, cancellationToken) ||
             await unitOfWork.Administrators.AnyAsync(a => a.Email == email, cancellationToken))
         {
-            throw new ForbiddenException("A user with that email already exists.");
+            throw new ValidationException("A user with that email already exists.");
         }
 
         if (await unitOfWork.Doctors.AnyAsync(doctor => doctor.Credential == credential, cancellationToken))
-            throw new ForbiddenException("A doctor with that credential already exists.");
+            throw new ValidationException("A doctor with that credential already exists.");
 
         var doctor = new Doctor
         {
@@ -170,36 +153,23 @@ public class UserService(IUnitOfWork unitOfWork, IPasswordHasher<User> hasher) :
         string area,
         CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(name))
-            throw new ForbiddenException("Name is required.");
+        if (string.IsNullOrWhiteSpace(name)) throw new ValidationException("Name is required.");
+        if (string.IsNullOrWhiteSpace(email)) throw new ValidationException("Email is required.");
+        if (string.IsNullOrWhiteSpace(password)) throw new ValidationException("Password is required.");
+        if (string.IsNullOrWhiteSpace(employeeNumber)) throw new ValidationException("Employee number is required.");
+        if (string.IsNullOrWhiteSpace(workingShift)) throw new ValidationException("Working shift is required.");
+        if (string.IsNullOrWhiteSpace(area)) throw new ValidationException("Area is required.");
 
-        if (string.IsNullOrWhiteSpace(email))
-            throw new ForbiddenException("Email is required.");
-
-        if (string.IsNullOrWhiteSpace(password))
-            throw new ForbiddenException("Password is required.");
-
-        if (string.IsNullOrWhiteSpace(employeeNumber))
-            throw new ForbiddenException("Employee number is required.");
-
-        if (string.IsNullOrWhiteSpace(workingShift))
-            throw new ForbiddenException("Working shift is required.");
-
-        if (string.IsNullOrWhiteSpace(area))
-            throw new ForbiddenException("Area is required.");
-
-
-        // Valida si el email ya existe en alguna de las cuatro tablas de usuarios.
-        if (await unitOfWork.Receptionists.AnyAsync(receptionist => receptionist.Email == email, cancellationToken) ||
-            await unitOfWork.Patients.AnyAsync(patient => patient.Email == email, cancellationToken) ||
-            await unitOfWork.Doctors.AnyAsync(doctor => doctor.Email == email, cancellationToken) ||
+        if (await unitOfWork.Patients.AnyAsync(p => p.Email == email, cancellationToken) ||
+            await unitOfWork.Doctors.AnyAsync(d => d.Email == email, cancellationToken) ||
+            await unitOfWork.Receptionists.AnyAsync(r => r.Email == email, cancellationToken) ||
             await unitOfWork.Administrators.AnyAsync(a => a.Email == email, cancellationToken))
         {
-            throw new ForbiddenException("A user with that email already exists.");
+            throw new ValidationException("A user with that email already exists.");
         }
 
         if (await unitOfWork.Receptionists.AnyAsync(receptionist => receptionist.EmployeeNumber == employeeNumber, cancellationToken))
-            throw new ForbiddenException("A user with that employee number already exists.");
+            throw new ValidationException("A user with that employee number already exists.");
 
         var receptionist = new Receptionist
         {
@@ -222,28 +192,32 @@ public class UserService(IUnitOfWork unitOfWork, IPasswordHasher<User> hasher) :
         var patient = await unitOfWork.Patients.GetByIdAsync(userId, cancellationToken);
         if (patient is not null)
         {
-            unitOfWork.Patients.Remove(patient); await unitOfWork.SaveChangesAsync(cancellationToken);
+            unitOfWork.Patients.Remove(patient);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
             return;
         }
 
         var doctor = await unitOfWork.Doctors.GetByIdAsync(userId, cancellationToken);
         if (doctor is not null)
         {
-            unitOfWork.Doctors.Remove(doctor); await unitOfWork.SaveChangesAsync(cancellationToken);
+            unitOfWork.Doctors.Remove(doctor);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
             return;
         }
 
         var receptionist = await unitOfWork.Receptionists.GetByIdAsync(userId, cancellationToken);
         if (receptionist is not null)
         {
-            unitOfWork.Receptionists.Remove(receptionist); await unitOfWork.SaveChangesAsync(cancellationToken);
+            unitOfWork.Receptionists.Remove(receptionist);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
             return;
         }
 
         var admin = await unitOfWork.Administrators.GetByIdAsync(userId, cancellationToken);
         if (admin is not null)
         {
-            unitOfWork.Administrators.Remove(admin); await unitOfWork.SaveChangesAsync(cancellationToken);
+            unitOfWork.Administrators.Remove(admin);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
             return;
         }
 

@@ -2,8 +2,6 @@
 using TPI_2026.Domain.Entities;
 using TPI_2026.Domain.Common;
 using TPI_2026.Application.Abstractions.Interfaces.Events;
-using Microsoft.Identity.Client;
-using System.Configuration.Internal;
 using Microsoft.Extensions.DependencyInjection; // para usar el BaseEvent
 
 namespace TPI_2026.Infrastructure.Persistence;
@@ -120,10 +118,30 @@ public class ApplicationDbContext : DbContext
             .WithMany(p => p.MedicalHistories)
             .HasForeignKey(mh => mh.PatientId)
             .OnDelete(DeleteBehavior.Cascade);
+
+
+        // numeo de empleado único para que no se repita entre recepcionistas
+        modelBuilder.Entity<Receptionist>()
+            .HasIndex(r => r.EmployeeNumber)   
+            .IsUnique();
+
     }
+
+    
+
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
+        /* Actualiza automáticamente UpdatedAt en toda entidad que haya sido modificada.
+        Se hace antes de guardar para que el timestamp refleje el momento exacto
+        en que se persistió el cambio. */
+        var now = DateTime.UtcNow;
+        foreach (var entry in ChangeTracker.Entries<BaseEntity>())
+        {
+            if (entry.State == EntityState.Modified)
+                entry.Entity.UpdatedAt = now;
+        }
+
         /* Se filtran las entidades que heredan de BaseEntity y que tengan algún evento pendiente
            en su lista interna DomainEvents */
         var entitiesWithEvents = ChangeTracker.Entries<BaseEntity>()

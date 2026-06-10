@@ -3,7 +3,7 @@ namespace TPI_2026.Domain.Exceptions;
 public class DomainException(string message) : Exception(message) { }
 
 public class NotCancellableAppointmentException(Guid appointmentId)
-    : DomainException($"El turno {appointmentId} no puede ser cancelado en su estado actual.");
+    : DomainException($"The appointment {appointmentId} cannot be cancelled in its current state.");
 
-public class UserNotFoundException(Guid userId)
-    : DomainException($"No se encontró el usuario con id {userId}");
+public class NotCompleteableAppointmentException(Guid appointmentId)
+    : DomainException($"The appointment {appointmentId} cannot be completed in its current state.");

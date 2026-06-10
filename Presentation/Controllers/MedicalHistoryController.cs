@@ -14,11 +14,11 @@ namespace TPI_2026.Presentation.Controllers
     [ApiController]
     public class MedicalHistoryController : ControllerBase
     {
-        private readonly IMedicalHistoryService _MedicalHistoryService;
+        private readonly IMedicalHistoryService _medicalHistoryService;
 
         public MedicalHistoryController(IMedicalHistoryService MedicalHistoryService)
         {
-            _MedicalHistoryService = MedicalHistoryService;
+            _medicalHistoryService = MedicalHistoryService;
         }
 
         [HttpGet("{patientId}")]
@@ -28,10 +28,23 @@ namespace TPI_2026.Presentation.Controllers
             CancellationToken cancellationToken = default
         )
         {
-            var medicalHistory = await _MedicalHistoryService.GetPatientByIdAsync(patientId, cancellationToken);
+            var medicalHistory = await _medicalHistoryService.GetPatientMedicalHistoriesAsync(patientId, cancellationToken);
             return Ok(medicalHistory);
         }
 
-
+        [HttpPost]
+        [Authorize(Roles = "Doctor")]
+        public async Task<IActionResult> CreateDiagnostic(
+            [FromBody] CreateMedicalHistoryReq request,
+            CancellationToken cancellationToken = default
+        )
+        {
+            var medicalHistoryId = await _medicalHistoryService.CreateMedicalHistoryAsync(
+                request.AppointmentId,
+                request.Diagnostic,
+                cancellationToken
+            );
+            return Ok(new { Id = medicalHistoryId });
+        }
     }
 }

@@ -44,10 +44,13 @@ public class ApplicationDbContextInitialiser
     {
         if (!context.Administrators.Any())
         {
+            var now = DateTime.UtcNow;
             var admin = new Administrator
             {
                 Name = "Admin",
                 Email = "admin@hospital.com",
+                CreatedAt = now,
+                UpdatedAt = now
             };
             admin.Password = hasher.HashPassword(admin, "Admin1234!");
 

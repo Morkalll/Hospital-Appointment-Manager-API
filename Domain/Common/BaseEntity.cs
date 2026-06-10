@@ -16,15 +16,25 @@ public abstract class BaseEntity
     public IReadOnlyCollection<BaseEvent> DomainEvents => _domainEvents.AsReadOnly();
 
 
-    public void AddDomainEvent(BaseEvent e) => _domainEvents.Add(e);
-    public void RemoveDomainEvent(BaseEvent e) => _domainEvents.Remove(e);
+    public void AddDomainEvent(BaseEvent baseEvent) => _domainEvents.Add(baseEvent);
+    public void RemoveDomainEvent(BaseEvent baseEvent) => _domainEvents.Remove(baseEvent);
     public void ClearDomainEvents() => _domainEvents.Clear();
 
-    // IsDeleted para manejar borrado logico, y lo demas para 
-    // manejar fechas y tiempos de create, update y delete
-    public bool IsDeleted {get; set;}
-    public DateTime CreatedAt {get; set;}
-    public DateTime UpdatedAt {get; set;}
-    public DateTime DeletedAt {get; set;}
-   
-}  
+    /* 
+    IsDeleted para manejar borrado logico, y lo demas para 
+    manejar fechas y tiempos de create, update y delete
+    */
+    public bool IsDeleted { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
+    public DateTime? DeletedAt { get; set; }
+
+    // Se llama desde el repositorio en lugar de DbSet.Remove().
+    public void SoftDelete(DateTime utcNow)
+    {
+        IsDeleted = true;
+        UpdatedAt = utcNow;
+        DeletedAt = utcNow;
+    }
+
+}

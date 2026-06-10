@@ -1,56 +1,57 @@
-using Microsoft.EntityFrameworkCore;
 using TPI_2026.Application.Abstractions.Interfaces.Services;
 using TPI_2026.Application.Abstractions.Interfaces.Repositories;
-using TPI_2026.Application.Exceptions;
+using TPI_2026.Application.Exceptions; 
 using TPI_2026.Application.Responses;
 using TPI_2026.Domain.Entities;
 using TPI_2026.Domain.Enums;
 
 namespace TPI_2026.Application.Services;
 
-public class MedicalHistoryService(IUnitOfWork unitOfWork, ICurrentUserService currentUserService) : IMedicalHistoryService
+public class MedicalHistoryService(IUnitOfWork unitOfWork) : IMedicalHistoryService
 {
-    public async Task<Guid> AddEntryAsync(
+    public async Task<Guid> CreateMedicalHistoryAsync(
         Guid appointmentId,
         string diagnostic,
         CancellationToken cancellationToken = default)
     {
+        
         if (string.IsNullOrWhiteSpace(diagnostic))
-            throw new ForbiddenException("Diagnostic is required.");
+            throw new ValidationException("Diagnostic is required.");
 
         if (diagnostic.Length > 2000)
-            throw new ForbiddenException("Diagnostic cannot exceed 2000 characters.");
-
+            throw new ValidationException("Diagnostic cannot exceed 2000 characters.");
 
         var appointment = await unitOfWork.Appointments.GetWithMedicalHistoryAsync(appointmentId, cancellationToken)
             ?? throw new NotFoundException(nameof(Appointment), appointmentId);
 
         if (appointment.State != AppointmentState.Confirmed)
-            throw new ForbiddenException("Medical history can only be added to confirmed appointments.");
+            throw new ValidationException("Medical history can only be added to confirmed appointments.");
 
         if (appointment.MedicalHistory is not null)
+            throw new ValidationException("A medical history already exists for this appointment.");
+
+        var newMedicalHistory = new MedicalHistory
         {
-            appointment.MedicalHistory.AddEntry(diagnostic);
-            await unitOfWork.SaveChangesAsync(cancellationToken);
-            return appointment.MedicalHistory.Id;
-        }
+            Id = Guid.NewGuid(),
+            AppointmentId = appointmentId,
+            PatientId = appointment.PatientId,
+            Diagnostic = diagnostic,
+            DateTime = DateTime.UtcNow
+        };
 
+        appointment.MedicalHistory = newMedicalHistory;
 
-        var history = MedicalHistory.Create(
-            appointmentId, appointment.PatientId, diagnostic, appointment.DateTime);
+        unitOfWork.MedicalHistories.Add(newMedicalHistory);
 
-        unitOfWork.MedicalHistories.Add(history);
         await unitOfWork.SaveChangesAsync(cancellationToken);
-        return history.Id;
+
+        return newMedicalHistory.Id;
     }
 
-    public async Task<List<MedicalHistoryDto>> GetPatientByIdAsync(Guid patientId, CancellationToken cancellationToken = default)
+    public async Task<List<MedicalHistoryDto>> GetPatientMedicalHistoriesAsync(Guid patientId, CancellationToken cancellationToken = default)
     {
-        if (currentUserService.Role == "Patient" && currentUserService.UserId != patientId)
-            throw new ForbiddenException("Patients can only access their own medical history.");
-        
         var medicalHistories = await unitOfWork.MedicalHistories.GetByPatientIdWithDetailsAsync(patientId, cancellationToken);
-    
+
         return medicalHistories
         .Select(medicalHistory => new MedicalHistoryDto(
                 medicalHistory.Id,

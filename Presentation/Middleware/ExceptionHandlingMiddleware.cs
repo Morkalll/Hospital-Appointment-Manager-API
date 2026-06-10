@@ -5,6 +5,8 @@ using System.Text.Json;
 using System;
 using System.Threading.Tasks;
 using TPI_2026.Application.Exceptions;
+using TPI_2026.Domain.Exceptions;
+
 
 namespace TPI_2026.Presentation.Middleware
 {
@@ -34,10 +36,11 @@ namespace TPI_2026.Presentation.Middleware
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = exception switch
             {
-            NotFoundException => (int)HttpStatusCode.NotFound, 
-            ForbiddenException => (int)HttpStatusCode.Forbidden, 
-            ValidationException => (int)HttpStatusCode.BadRequest, 
-            _ => (int)HttpStatusCode.InternalServerError //default
+                NotFoundException => (int)HttpStatusCode.NotFound,
+                ForbiddenException => (int)HttpStatusCode.Forbidden,
+                ValidationException => (int)HttpStatusCode.BadRequest,
+                DomainException => (int)HttpStatusCode.BadRequest,
+                _ => (int)HttpStatusCode.InternalServerError //default
             };
 
             var response = new

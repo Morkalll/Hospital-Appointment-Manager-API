@@ -1,10 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using TPI_2026.Application.Abstractions.Interfaces.Repositories;
+using TPI_2026.Domain.Common;
 
 namespace TPI_2026.Infrastructure.Persistence.Repositories;
 
-public class Repository<T> : IRepository<T> where T : class
+public class Repository<T> : IRepository<T> where T : BaseEntity
 {
     protected readonly DbContext dbContext;
     protected readonly DbSet<T> DbSet;
@@ -17,34 +18,43 @@ public class Repository<T> : IRepository<T> where T : class
         DbSet = dbContext.Set<T>();
     }
 
+
+    // Propiedad interna que filtra por defecto los registros borrados lógicamente.
+    protected IQueryable<T> ActiveSet => DbSet.Where(entity => !entity.IsDeleted);
+
     public virtual async Task<T?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await DbSet.FindAsync(new object[] { id }, cancellationToken);
+        // Se usa FirstOrDefaultAsync para que el filtro IsDeleted se aplique correctamente.
+        return await ActiveSet.FirstOrDefaultAsync(entity => entity.Id == id, cancellationToken);
     }
 
     public virtual async Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default)
     {
-        return await DbSet.FirstOrDefaultAsync(predicate, cancellationToken);
+        return await ActiveSet.FirstOrDefaultAsync(predicate, cancellationToken);
     }
 
     public virtual async Task<List<T>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        return await DbSet.ToListAsync(cancellationToken);
+        return await ActiveSet.ToListAsync(cancellationToken);
     }
 
     public virtual async Task<bool> AnyAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default)
     {
-        return await DbSet.AnyAsync(predicate, cancellationToken);
+        return await ActiveSet.AnyAsync(predicate, cancellationToken);
     }
 
     public void Add(T entity)
     {
+        var now = DateTime.UtcNow;
+        entity.CreatedAt = now;
+        entity.UpdatedAt = now;
         DbSet.Add(entity);
     }
 
+    // Borrado lógico. El cambio se persiste en el próximo SaveChangesAsync del UnitOfWork.
     public void Remove(T entity)
     {
-        DbSet.Remove(entity);
+        entity.SoftDelete(DateTime.UtcNow);
     }
 }
 
