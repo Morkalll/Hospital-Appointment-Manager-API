@@ -3,6 +3,7 @@ using TPI_2026.Infrastructure;
 using TPI_2026.Infrastructure.Persistence;
 using TPI_2026.Presentation.Infrastructure;
 using TPI_2026.Presentation.Middleware;
+using System.Text.Json.Serialization;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,7 +14,8 @@ builder.AddKeyVaultIfConfigured();
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddPresentationServices(builder.Configuration);
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
 var app = builder.Build();
 
