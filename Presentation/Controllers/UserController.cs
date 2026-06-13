@@ -48,7 +48,7 @@ namespace TPI_2026.Presentation.Controllers
             CancellationToken cancellationToken = default
         )
         {
-            var patientId = await _userService.RegisterPatientAsync(request.Name, request.Email, request.Password, request.Dni, request.BirthDate, request.PhoneNumber, request.Address, cancellationToken);
+            var patientId = await _userService.RegisterPatientAsync(request.Name, request.Email, request.Dni, request.BirthDate, request.PhoneNumber, request.Address, cancellationToken);
             return Ok(new { Id = patientId });
         }
 

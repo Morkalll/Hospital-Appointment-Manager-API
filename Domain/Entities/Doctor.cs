@@ -5,6 +5,7 @@ namespace TPI_2026.Domain.Entities;
 // Doctor hereda de User
 public class Doctor : User
 {
+    public string Password { get; set; } = string.Empty;
     public string Credential { get; set; } = string.Empty;
     // Atributo Specialty es del tipo enum Specialty
     public Specialty Specialty { get; set; }
