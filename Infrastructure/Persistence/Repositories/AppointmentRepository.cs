@@ -11,7 +11,7 @@ public class AppointmentRepository : Repository<Appointment>, IAppointmentReposi
 
     public override async Task<Appointment?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await ActiveSet
+        return await DbSet
             .Include(appointment => appointment.Patient)
             .Include(appointment => appointment.Doctor)
             .FirstOrDefaultAsync(appointment => appointment.Id == id, cancellationToken);
@@ -20,14 +20,14 @@ public class AppointmentRepository : Repository<Appointment>, IAppointmentReposi
 
     public async Task<Appointment?> GetWithMedicalHistoryAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await ActiveSet
+        return await DbSet
             .Include(appointment => appointment.MedicalHistory)
             .FirstOrDefaultAsync(appointment => appointment.Id == id, cancellationToken);
     }
 
     public async Task<List<Appointment>> GetByPatientIdAsync(Guid patientId, CancellationToken cancellationToken = default)
     {
-        return await ActiveSet
+        return await DbSet
             .Where(appointment => appointment.PatientId == patientId)
             .Include(appointment => appointment.Doctor)
             .Include(appointment => appointment.Room)
@@ -36,7 +36,7 @@ public class AppointmentRepository : Repository<Appointment>, IAppointmentReposi
 
     public async Task<bool> HasOverlapAsync(Guid doctorId, DateTime dateTime, CancellationToken cancellationToken = default)
     {
-        return await ActiveSet.AnyAsync(appointment =>
+        return await DbSet.AnyAsync(appointment =>
             appointment.DoctorId == doctorId
             && appointment.DateTime == dateTime
             && appointment.State != AppointmentState.Canceled,

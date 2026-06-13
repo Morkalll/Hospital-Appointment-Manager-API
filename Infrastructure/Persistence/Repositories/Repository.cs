@@ -19,35 +19,21 @@ public class Repository<T> : IRepository<T> where T : BaseEntity
     }
 
 
-    // Propiedad interna que filtra por defecto los registros borrados lógicamente.
-    protected IQueryable<T> ActiveSet => DbSet.Where(entity => !entity.IsDeleted);
-
     public virtual async Task<T?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
-    {
-        // Se usa FirstOrDefaultAsync para que el filtro IsDeleted se aplique correctamente.
-        return await ActiveSet.FirstOrDefaultAsync(entity => entity.Id == id, cancellationToken);
-    }
+        => await DbSet.FirstOrDefaultAsync(entity => entity.Id == id, cancellationToken);
 
     public virtual async Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default)
-    {
-        return await ActiveSet.FirstOrDefaultAsync(predicate, cancellationToken);
-    }
+        => await DbSet.FirstOrDefaultAsync(predicate, cancellationToken);
 
     public virtual async Task<List<T>> GetAllAsync(CancellationToken cancellationToken = default)
-    {
-        return await ActiveSet.ToListAsync(cancellationToken);
-    }
+        => await DbSet.ToListAsync(cancellationToken);
 
     public virtual async Task<bool> AnyAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default)
-    {
-        return await ActiveSet.AnyAsync(predicate, cancellationToken);
-    }
+        => await DbSet.AnyAsync(predicate, cancellationToken);
+
 
     public void Add(T entity)
     {
-        var now = DateTime.UtcNow;
-        entity.CreatedAt = now;
-        entity.UpdatedAt = now;
         DbSet.Add(entity);
     }
 
