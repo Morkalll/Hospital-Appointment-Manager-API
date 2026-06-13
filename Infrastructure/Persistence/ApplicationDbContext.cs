@@ -125,10 +125,7 @@ public class ApplicationDbContext : DbContext
             .HasIndex(r => r.EmployeeNumber)
             .IsUnique();
 
-        modelBuilder.Entity<Patient>().HasQueryFilter(e => !e.IsDeleted);
-        modelBuilder.Entity<Doctor>().HasQueryFilter(e => !e.IsDeleted);
-        modelBuilder.Entity<Receptionist>().HasQueryFilter(e => !e.IsDeleted);
-        modelBuilder.Entity<Administrator>().HasQueryFilter(e => !e.IsDeleted);
+        modelBuilder.Entity<User>().HasQueryFilter(e => !e.IsDeleted);
         modelBuilder.Entity<Room>().HasQueryFilter(e => !e.IsDeleted);
         modelBuilder.Entity<Appointment>().HasQueryFilter(e => !e.IsDeleted);
         modelBuilder.Entity<MedicalHistory>().HasQueryFilter(e => !e.IsDeleted);
