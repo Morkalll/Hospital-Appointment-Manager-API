@@ -10,7 +10,6 @@
   <PackageReference Include="Microsoft.EntityFrameworkCore" />
   <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" />
   <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
-  <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
   <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
   <PackageReference Include="Microsoft.Extensions.Http.Polly" />
   </ItemGroup>
@@ -18,6 +17,10 @@
   <ItemGroup>
     <ProjectReference Include="..\Application\Application.csproj" />
     <ProjectReference Include="..\Domain\Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Persistence\Migrations\Old Migrations\**\*.cs" />
   </ItemGroup>
 
 </Project>
