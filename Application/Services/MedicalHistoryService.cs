@@ -1,6 +1,6 @@
 using TPI_2026.Application.Abstractions.Interfaces.Services;
 using TPI_2026.Application.Abstractions.Interfaces.Repositories;
-using TPI_2026.Application.Exceptions; 
+using TPI_2026.Application.Exceptions;
 using TPI_2026.Application.Responses;
 using TPI_2026.Domain.Entities;
 using TPI_2026.Domain.Enums;
@@ -14,7 +14,7 @@ public class MedicalHistoryService(IUnitOfWork unitOfWork) : IMedicalHistoryServ
         string diagnostic,
         CancellationToken cancellationToken = default)
     {
-        
+
         if (string.IsNullOrWhiteSpace(diagnostic))
             throw new ValidationException("Diagnostic is required.");
 
@@ -24,7 +24,7 @@ public class MedicalHistoryService(IUnitOfWork unitOfWork) : IMedicalHistoryServ
         var appointment = await unitOfWork.Appointments.GetWithMedicalHistoryAsync(appointmentId, cancellationToken)
             ?? throw new NotFoundException(nameof(Appointment), appointmentId);
 
-        if (appointment.State != AppointmentState.Completedg)
+        if (appointment.State != AppointmentState.Completed)
             throw new ValidationException("Medical history can only be added to confirmed appointments.");
 
         if (appointment.MedicalHistory is not null)
