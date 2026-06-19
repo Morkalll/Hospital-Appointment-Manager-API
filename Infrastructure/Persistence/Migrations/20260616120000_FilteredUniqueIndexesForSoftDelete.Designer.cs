@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TPI_2026.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using TPI_2026.Infrastructure.Persistence;
 namespace TPI_2026.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260616120000_FilteredUniqueIndexesForSoftDelete")]
+    partial class FilteredUniqueIndexesForSoftDelete
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -233,7 +236,7 @@ namespace TPI_2026.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("Credential")
                         .IsUnique()
-                        .HasFilter("[Credential] IS NOT NULL AND [IsDeleted] = 0");
+                        .HasFilter("[IsDeleted] = 0");
 
                     b.ToTable("User", t =>
                         {
@@ -265,7 +268,7 @@ namespace TPI_2026.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("Dni")
                         .IsUnique()
-                        .HasFilter("[Dni] IS NOT NULL AND [IsDeleted] = 0");
+                        .HasFilter("[IsDeleted] = 0");
 
                     b.HasDiscriminator().HasValue("Patient");
                 });
@@ -292,7 +295,7 @@ namespace TPI_2026.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("EmployeeNumber")
                         .IsUnique()
-                        .HasFilter("[EmployeeNumber] IS NOT NULL AND [IsDeleted] = 0");
+                        .HasFilter("[IsDeleted] = 0");
 
                     b.HasDiscriminator().HasValue("Receptionist");
                 });

@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using TPI_2026.Domain.Entities;
 using TPI_2026.Domain.Common;
 using TPI_2026.Application.Abstractions.Interfaces.Events;
@@ -48,17 +48,20 @@ public class ApplicationDbContext : DbContext
         // email unique para que no se repita entre usuarios
         modelBuilder.Entity<User>()
             .HasIndex(u => u.Email)
-            .IsUnique();
+            .IsUnique()
+            .HasFilter("[IsDeleted] = 0");
 
         // dni unique para que no se repita entre pacientes
         modelBuilder.Entity<Patient>()
             .HasIndex(p => p.Dni)
-            .IsUnique();
+            .IsUnique()
+            .HasFilter("[Dni] IS NOT NULL AND [IsDeleted] = 0");
 
         // crendencial unica para que no se repita entre doctores
         modelBuilder.Entity<Doctor>()
             .HasIndex(d => d.Credential)
-            .IsUnique();
+            .IsUnique()
+            .HasFilter("[Credential] IS NOT NULL AND [IsDeleted] = 0");
 
         // La especialidad del doctor se guarda como string
         modelBuilder.Entity<Doctor>()
@@ -123,7 +126,8 @@ public class ApplicationDbContext : DbContext
         // numeo de empleado único para que no se repita entre recepcionistas
         modelBuilder.Entity<Receptionist>()
             .HasIndex(r => r.EmployeeNumber)
-            .IsUnique();
+            .IsUnique()
+            .HasFilter("[EmployeeNumber] IS NOT NULL AND [IsDeleted] = 0");
 
         modelBuilder.Entity<User>().HasQueryFilter(e => !e.IsDeleted);
         modelBuilder.Entity<Room>().HasQueryFilter(e => !e.IsDeleted);

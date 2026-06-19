@@ -15,6 +15,7 @@ public static class DependencyInjection
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IMedicalHistoryService, MedicalHistoryService>();
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IRoomService, RoomService>();
         services.AddTransient<IEventHandler<AppointmentCreatedEvent>, SendEmailOnAppointmentCreatedHandler>();
         services.AddTransient<IEventHandler<AppointmentCanceledEvent>, SendEmailOnAppointmentCanceledHandler>();
         return services;
