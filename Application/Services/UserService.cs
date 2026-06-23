@@ -225,7 +225,7 @@ public class UserService(
         var patient = await unitOfWork.Patients.GetByIdAsync(userId, cancellationToken);
         if (patient is not null)
         {
-            unitOfWork.Patients.Remove(patient);
+            patient.IsDeleted = true;
             await unitOfWork.SaveChangesAsync(cancellationToken);
             return;
         }
@@ -233,7 +233,8 @@ public class UserService(
         var doctor = await unitOfWork.Doctors.GetByIdAsync(userId, cancellationToken);
         if (doctor is not null)
         {
-            unitOfWork.Doctors.Remove(doctor);
+            doctor.IsDeleted = true;
+            doctor.IsAvailable = false;
             await unitOfWork.SaveChangesAsync(cancellationToken);
             return;
         }
@@ -241,18 +242,11 @@ public class UserService(
         var receptionist = await unitOfWork.Receptionists.GetByIdAsync(userId, cancellationToken);
         if (receptionist is not null)
         {
-            unitOfWork.Receptionists.Remove(receptionist);
+            receptionist.IsDeleted = true;
             await unitOfWork.SaveChangesAsync(cancellationToken);
             return;
         }
 
-        var admin = await unitOfWork.Administrators.GetByIdAsync(userId, cancellationToken);
-        if (admin is not null)
-        {
-            unitOfWork.Administrators.Remove(admin);
-            await unitOfWork.SaveChangesAsync(cancellationToken);
-            return;
-        }
 
         throw new NotFoundException("User", userId);
     }

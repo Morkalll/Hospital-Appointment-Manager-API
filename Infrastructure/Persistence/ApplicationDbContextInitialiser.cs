@@ -3,6 +3,7 @@ using TPI_2026.Domain.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using BCrypt.Net;
 
 namespace TPI_2026.Infrastructure.Persistence;
 
@@ -52,7 +53,7 @@ public class ApplicationDbContextInitialiser
                 CreatedAt = now,
                 UpdatedAt = now
             };
-            admin.Password = hasher.HashPassword(admin, "Admin1234!");
+            admin.Password = BCrypt.Net.BCrypt.HashPassword("Admin1234!");
 
             context.Administrators.Add(admin);
             await context.SaveChangesAsync();

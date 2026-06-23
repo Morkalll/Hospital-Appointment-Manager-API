@@ -10,5 +10,4 @@ public interface IRepository<T> where T : BaseEntity
     Task<List<T>> GetAllAsync(CancellationToken cancellationToken = default);
     Task<bool> AnyAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default);
     void Add(T entity);
-    void Remove(T entity);
 }
