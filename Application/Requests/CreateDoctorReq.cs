@@ -7,6 +7,7 @@ namespace TPI_2026.Application.Requests
         string Email,
         string Password,
         string Credential,
-        Specialty Specialty
+        Specialty Specialty,
+        string PhoneNumber
     );
 }

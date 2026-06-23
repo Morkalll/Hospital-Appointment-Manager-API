@@ -50,11 +50,5 @@ public class Repository<T> : IRepository<T> where T : BaseEntity
         entity.UpdatedAt = now;
         DbSet.Add(entity);
     }
-
-    // Borrado lógico. El cambio se persiste en el próximo SaveChangesAsync del UnitOfWork.
-    public void Remove(T entity)
-    {
-        entity.SoftDelete(DateTime.UtcNow);
-    }
 }
 
