@@ -10,7 +10,8 @@ namespace TPI_2026.Infrastructure.Persistence;
 public class ApplicationDbContextInitialiser
 (
     ILogger<ApplicationDbContextInitialiser> logger,
-    ApplicationDbContext context
+    ApplicationDbContext context,
+    IPasswordHasher<Administrator> hasher
 )
 
 {
@@ -61,7 +62,7 @@ public class ApplicationDbContextInitialiser
 
 
         if (!context.Rooms.Any())
-        {  
+        {
             var now = DateTime.UtcNow;
             var rooms = new List<Room>
             {
@@ -72,9 +73,9 @@ public class ApplicationDbContextInitialiser
                 new Room { Number = "105", Floor = 3, Specialty = Specialty.Traumatology, CreatedAt = now, UpdatedAt = now },
         };
 
-        context.Rooms.AddRange(rooms);
-        await context.SaveChangesAsync();
-        logger.LogInformation("Initial rooms created.");
+            context.Rooms.AddRange(rooms);
+            await context.SaveChangesAsync();
+            logger.LogInformation("Initial rooms created.");
         }
     }
 }

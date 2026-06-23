@@ -122,12 +122,16 @@ public class ApplicationDbContext : DbContext
 
         // numeo de empleado único para que no se repita entre recepcionistas
         modelBuilder.Entity<Receptionist>()
-            .HasIndex(r => r.EmployeeNumber)   
+            .HasIndex(r => r.EmployeeNumber)
             .IsUnique();
 
+        modelBuilder.Entity<User>().HasQueryFilter(e => !e.IsDeleted);
+        modelBuilder.Entity<Room>().HasQueryFilter(e => !e.IsDeleted);
+        modelBuilder.Entity<Appointment>().HasQueryFilter(e => !e.IsDeleted);
+        modelBuilder.Entity<MedicalHistory>().HasQueryFilter(e => !e.IsDeleted);
     }
 
-    
+
 
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
@@ -138,7 +142,12 @@ public class ApplicationDbContext : DbContext
         var now = DateTime.UtcNow;
         foreach (var entry in ChangeTracker.Entries<BaseEntity>())
         {
-            if (entry.State == EntityState.Modified)
+            if (entry.State == EntityState.Added)
+            {
+                entry.Entity.CreatedAt = now;
+                entry.Entity.UpdatedAt = now;
+            }
+            else if (entry.State == EntityState.Modified)
                 entry.Entity.UpdatedAt = now;
         }
 

@@ -13,21 +13,45 @@ using TPI_2026.Application.Responses;
 namespace TPI_2026.Application.Services;
 
 
-public class AuthService(IUnitOfWork unitOfWork, IPasswordHasher<User> hasher, IConfiguration configuration) : IAuthService
+public class AuthService(
+    IUnitOfWork unitOfWork,
+    IPasswordHasher<Doctor> doctorHasher,
+    IPasswordHasher<Receptionist> receptionistHasher,
+    IPasswordHasher<Administrator> adminHasher,
+    IConfiguration configuration) : IAuthService
 {
     public async Task<AuthResponse> LoginAsync(string email, string password, CancellationToken cancellationToken = default)
     {
         // Busca el usuario en todas las tablas. 
-        User? user = await unitOfWork.Patients.FirstOrDefaultAsync(p => p.Email == email, cancellationToken)
-            ?? (User?)await unitOfWork.Doctors.FirstOrDefaultAsync(d => d.Email == email, cancellationToken)
-            ?? (User?)await unitOfWork.Receptionists.FirstOrDefaultAsync(r => r.Email == email, cancellationToken)
-            ?? (User?)await unitOfWork.Administrators.FirstOrDefaultAsync(a => a.Email == email, cancellationToken);
+        User? user = await unitOfWork.Patients.FirstOrDefaultAsync(patient => patient.Email == email, cancellationToken)
+            ?? (User?)await unitOfWork.Doctors.FirstOrDefaultAsync(doctor => doctor.Email == email, cancellationToken)
+            ?? (User?)await unitOfWork.Receptionists.FirstOrDefaultAsync(receptionist => receptionist.Email == email, cancellationToken)
+            ?? (User?)await unitOfWork.Administrators.FirstOrDefaultAsync(admin => admin.Email == email, cancellationToken);
 
         if (user is null)
             throw new NotFoundException("User", email);
 
+
+        var doctor = await unitOfWork.Doctors.FirstOrDefaultAsync(d => d.Email == email, cancellationToken);
+        if (doctor is not null)
+            return AuthenticateAndBuildResponse(doctor, doctor.Password, password, doctorHasher);
+
+        var receptionist = await unitOfWork.Receptionists.FirstOrDefaultAsync(r => r.Email == email, cancellationToken);
+        if (receptionist is not null)
+            return AuthenticateAndBuildResponse(receptionist, receptionist.Password, password, receptionistHasher);
+
+        var admin = await unitOfWork.Administrators.FirstOrDefaultAsync(a => a.Email == email, cancellationToken);
+        if (admin is not null)
+            return AuthenticateAndBuildResponse(admin, admin.Password, password, adminHasher);
+
+        throw new NotFoundException("User", email);
+    }
+
+    private AuthResponse AuthenticateAndBuildResponse<T>(T user, string hashedPassword, string plainPassword, IPasswordHasher<T> hasher)
+    where T : User
+    {
         // compara password con el hash guardado en la base de datos, en caso de ser PasswordVerificationResult.Failed, tira una excepcion
-        var result = hasher.VerifyHashedPassword(user, user.Password, password);
+        var result = hasher.VerifyHashedPassword(user, hashedPassword, plainPassword);
         if (result == PasswordVerificationResult.Failed)
             throw new ForbiddenException("Invalid credentials.");
 
@@ -38,7 +62,7 @@ public class AuthService(IUnitOfWork unitOfWork, IPasswordHasher<User> hasher, I
             UserId = user.Id,
             Email = user.Email
         };
-    }  
+    }
 
     private string GenerateToken(User user)
     {
@@ -53,7 +77,7 @@ public class AuthService(IUnitOfWork unitOfWork, IPasswordHasher<User> hasher, I
             new Claim(ClaimTypes.Role, user.Role.ToString()),
             new Claim(JwtRegisteredClaimNames.Email, user.Email)
         };
-        
+
         // Se genera el token con los datos necesarios.
         var token = new JwtSecurityToken(
             issuer: configuration["Jwt:Issuer"],
@@ -62,7 +86,7 @@ public class AuthService(IUnitOfWork unitOfWork, IPasswordHasher<User> hasher, I
             expires: DateTime.UtcNow.AddHours(8),
             signingCredentials: credentials
         );
-        
+
         // Convierte el token a string para devolverlo al cliente (el frontend)
         return new JwtSecurityTokenHandler().WriteToken(token);
     }

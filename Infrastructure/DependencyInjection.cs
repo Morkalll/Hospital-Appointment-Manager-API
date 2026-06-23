@@ -28,7 +28,9 @@ public static class DependencyInjection
         services.AddScoped<DbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<ApplicationDbContextInitialiser>();
-        services.AddScoped<IPasswordHasher<User>, BCryptPasswordHasher<User>>();
+        services.AddScoped<IPasswordHasher<Doctor>, BCryptPasswordHasher<Doctor>>();
+        services.AddScoped<IPasswordHasher<Receptionist>, BCryptPasswordHasher<Receptionist>>();
+        services.AddScoped<IPasswordHasher<Administrator>, BCryptPasswordHasher<Administrator>>();
 
         services.AddHttpClient("ResendClient", client =>
         {

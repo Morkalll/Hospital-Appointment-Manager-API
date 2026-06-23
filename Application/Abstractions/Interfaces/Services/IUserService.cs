@@ -15,7 +15,6 @@ public interface IUserService
     Task<Guid> RegisterPatientAsync(
         string name,
         string email,
-        string password,
         string dni,
         DateOnly birthDate,
         string phoneNumber,
