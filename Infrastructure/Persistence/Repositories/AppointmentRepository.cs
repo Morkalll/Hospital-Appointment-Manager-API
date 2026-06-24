@@ -34,12 +34,12 @@ public class AppointmentRepository : Repository<Appointment>, IAppointmentReposi
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<bool> HasOverlapAsync(Guid doctorId, DateTime dateTime, CancellationToken cancellationToken = default)
+    public async Task<Appointment?> GetAvailableAsync(Guid doctorId, DateTime dateTime, CancellationToken cancellationToken = default)
     {
-        return await DbSet.AnyAsync(appointment =>
+        return await DbSet.FirstOrDefaultAsync(appointment =>
             appointment.DoctorId == doctorId
             && appointment.DateTime == dateTime
-            && appointment.State != AppointmentState.Canceled,
+            && appointment.State == AppointmentState.Available,
             cancellationToken);
     }
 }
