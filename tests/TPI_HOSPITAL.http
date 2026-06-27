@@ -1,0 +1,106 @@
+@baseUrl = http://localhost:5163/api
+
+### 1. Create Patient (No Auth Required for Test Endpoint or Staff Auth)
+POST {{baseUrl}}/User/create-patient
+Content-Type: application/json
+
+{
+  "name": "Jane Doe",
+  "email": "jane.doe@example.com",
+  "dni": "12345678",
+  "birthDate": "1990-01-01",
+  "phoneNumber": "555-1234",
+  "address": "123 Main St"
+}
+
+### 2. Create Doctor
+POST {{baseUrl}}/User/create-doctor
+Content-Type: application/json
+
+{
+  "name": "Dr. Smith",
+  "email": "dr.smith@example.com",
+  "password": "Password123!",
+  "credential": "MED123",
+  "specialty": "Cardiology"
+}
+
+### 3. Create Receptionist
+POST {{baseUrl}}/User/create-receptionist
+Content-Type: application/json
+
+{
+  "name": "Rec. Alice",
+  "email": "alice@example.com",
+  "password": "Password123!",
+  "employeeNumber": "EMP123",
+  "workingShift": "Morning",
+  "area": "Front Desk"
+}
+
+### 4. Login (Doctor) -> Replace token in env manually for subsequent requests
+# @name login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "dr.smith@example.com",
+  "password": "Password123!"
+}
+
+### Set token variable (requires manual assignment in some REST clients or uses the extracted one below)
+@token = {{login.response.body.token}}
+
+### 5. Get All Users
+GET {{baseUrl}}/User
+Authorization: Bearer {{token}}
+
+### 6. Get User By ID (Replace {id} with a real ID)
+GET {{baseUrl}}/User/00000000-0000-0000-0000-000000000000
+Authorization: Bearer {{token}}
+
+### 7. Delete User (Replace {id})
+DELETE {{baseUrl}}/User/00000000-0000-0000-0000-000000000000
+Authorization: Bearer {{token}}
+
+### 8. Get All Rooms
+GET {{baseUrl}}/Room
+Authorization: Bearer {{token}}
+
+### 9. Create Appointment
+POST {{baseUrl}}/Appointment/create-appointment
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "patientId": "00000000-0000-0000-0000-000000000000",
+  "doctorId": "00000000-0000-0000-0000-000000000000",
+  "roomId": "00000000-0000-0000-0000-000000000000",
+  "dateTime": "2026-07-01T10:00:00Z"
+}
+
+### 10. Cancel Appointment
+PUT {{baseUrl}}/Appointment/cancel-appointment/00000000-0000-0000-0000-000000000000
+Authorization: Bearer {{token}}
+
+### 11. Complete Appointment
+PUT {{baseUrl}}/Appointment/complete-appointment/00000000-0000-0000-0000-000000000000
+Authorization: Bearer {{token}}
+
+### 12. Get Patient Appointments
+GET {{baseUrl}}/Appointment/patient-appointments/00000000-0000-0000-0000-000000000000
+Authorization: Bearer {{token}}
+
+### 13. Create Medical History
+POST {{baseUrl}}/MedicalHistory
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "appointmentId": "00000000-0000-0000-0000-000000000000",
+  "diagnostic": "Patient is recovering well."
+}
+
+### 14. Get Medical History for Patient
+GET {{baseUrl}}/MedicalHistory/00000000-0000-0000-0000-000000000000
+Authorization: Bearer {{token}}

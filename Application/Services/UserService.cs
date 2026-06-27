@@ -247,6 +247,13 @@ public class UserService(
             return;
         }
 
+        var admin = await unitOfWork.Administrators.GetByIdAsync(userId, cancellationToken);
+        if (admin is not null)
+        {
+            admin.IsDeleted = true;
+            await unitOfWork.SaveChangesAsync(cancellationToken);
+            return;
+        }
 
         throw new NotFoundException("User", userId);
     }

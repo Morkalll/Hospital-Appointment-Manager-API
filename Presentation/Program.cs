@@ -19,11 +19,10 @@ builder.Services.AddControllers()
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    await app.InitialiseDatabaseAsync();
-}
-else
+// Siempre inicializar la DB para el TPI, sin importar si es Dev o Producción
+await app.InitialiseDatabaseAsync();
+
+if (!app.Environment.IsDevelopment())
 {
     app.UseHsts();
 }
