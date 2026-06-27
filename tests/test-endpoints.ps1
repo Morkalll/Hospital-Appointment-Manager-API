@@ -5,11 +5,13 @@ Write-Host "Disabling SSL validation for local tests..." -ForegroundColor Yellow
 [System.Net.ServicePointManager]::ServerCertificateValidationCallback = { $true }
 Start-Sleep -Seconds 3
 
+$rand = Get-Random -Minimum 1000 -Maximum 9999
+
 Write-Host "0. Admin Login..." -ForegroundColor Cyan
 try {
     $adminLoginBody = @{
         email = "admin@hospital.com"
-        password = "Doctor1234!"
+        password = "Admin1234!"
     } | ConvertTo-Json
     $adminLoginResponse = Invoke-RestMethod -Uri "$baseUrl/auth/login" -Method Post -Headers $Headers -Body $adminLoginBody
     $adminToken = $adminLoginResponse.token
@@ -30,9 +32,9 @@ try {
 Write-Host "1. Testing Create Patient..." -ForegroundColor Cyan
 try {
     $patientBody = @{
-        name = "Bob Marley"
-        email = "bob.marley@example.com"
-        dni = "87654321"
+        name = "Bob Marley $rand"
+        email = "bob.marley$rand@example.com"
+        dni = "8765$rand"
         birthDate = "1980-01-01"
         phoneNumber = "555-4321"
         address = "456 Side St"
@@ -47,7 +49,7 @@ try {
 # 2. Get Rooms (Need RoomId for Doctor)
 Write-Host "2. Testing Get Rooms..." -ForegroundColor Cyan
 try {
-    $roomsResponse = Invoke-RestMethod -Uri "$baseUrl/Rooms" -Method Get -Headers $Headers
+    $roomsResponse = Invoke-RestMethod -Uri "$baseUrl/Room" -Method Get -Headers $Headers
     $roomId = $roomsResponse[0].id
     Write-Host "Success! Found Room ID: $roomId" -ForegroundColor Green
 } catch {
@@ -58,9 +60,9 @@ try {
 Write-Host "3. Testing Create Doctor..." -ForegroundColor Cyan
 try {
     $doctorBody = @{
-        name = "Dr. House"
-        email = "dr.house@hospital.com"
-        credential = "MED-12345"
+        name = "Dr. House $rand"
+        email = "dr.house$rand@hospital.com"
+        credential = "MED-$rand"
         specialty = 0
         password = "Password123!"
         phoneNumber = "123456789"
@@ -75,10 +77,12 @@ try {
 Write-Host "4. Testing Create Receptionist..." -ForegroundColor Cyan
 try {
     $recBody = @{
-        name = "Alice Rec"
-        email = "alice@hospital.com"
-        employeeNumber = "REC-001"
+        name = "Alice Rec $rand"
+        email = "alice$rand@hospital.com"
+        employeeNumber = "REC-$rand"
         password = "Password123!"
+        workingShift = "Morning"
+        area = "Front"
     } | ConvertTo-Json
     $recResponse = Invoke-RestMethod -Uri "$baseUrl/User/create-receptionist" -Method Post -Headers $Headers -Body $recBody
     Write-Host "Success! Created Receptionist." -ForegroundColor Green
@@ -90,7 +94,7 @@ try {
 Write-Host "5. Testing Login (Auth)..." -ForegroundColor Cyan
 try {
     $loginBody = @{
-        email = "dr.house@hospital.com"
+        email = "dr.house$rand@hospital.com"
         password = "Password123!"
     } | ConvertTo-Json
     $loginResponse = Invoke-RestMethod -Uri "$baseUrl/auth/login" -Method Post -Headers $Headers -Body $loginBody
