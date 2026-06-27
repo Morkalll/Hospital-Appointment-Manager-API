@@ -41,7 +41,7 @@ public class AppointmentService(IUnitOfWork unitOfWork) : IAppointmentService
 
         appointment.AssignPatient(patientId);
 
-        // Se asignan las propiedades de navegación
+
         appointment.Patient = patient;
         appointment.Doctor = doctor;
 
