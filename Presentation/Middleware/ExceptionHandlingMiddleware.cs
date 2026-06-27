@@ -34,22 +34,39 @@ namespace TPI_2026.Presentation.Middleware
         private static Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
             context.Response.ContentType = "application/json";
-            context.Response.StatusCode = exception switch
+            
+            if (exception is NotFoundException or ForbiddenException or ValidationException or DomainException)
             {
-                NotFoundException => (int)HttpStatusCode.NotFound,
-                ForbiddenException => (int)HttpStatusCode.Forbidden,
-                ValidationException => (int)HttpStatusCode.BadRequest,
-                DomainException => (int)HttpStatusCode.BadRequest,
-                _ => (int)HttpStatusCode.InternalServerError //default
-            };
+                context.Response.StatusCode = exception switch
+                {
+                    NotFoundException => (int)HttpStatusCode.NotFound,
+                    ForbiddenException => (int)HttpStatusCode.Forbidden,
+                    ValidationException => (int)HttpStatusCode.BadRequest,
+                    DomainException => (int)HttpStatusCode.BadRequest,
+                    _ => (int)HttpStatusCode.InternalServerError
+                };
 
-            var response = new
+                var response = new
+                {
+                    StatusCode = context.Response.StatusCode,
+                    Message = exception.Message
+                };
+
+                return context.Response.WriteAsync(JsonSerializer.Serialize(response));
+            }
+            else
             {
-                StatusCode = context.Response.StatusCode,
-                Message = exception.Message
-            };
+                context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 
-            return context.Response.WriteAsync(JsonSerializer.Serialize(response));
+                var result = JsonSerializer.Serialize(new
+                {
+                    StatusCode = context.Response.StatusCode,
+                    Message = exception.Message,
+                    StackTrace = exception.StackTrace
+                });
+
+                return context.Response.WriteAsync(result);
+            }
         }
     }
 }

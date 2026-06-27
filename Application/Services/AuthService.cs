@@ -22,14 +22,18 @@ public class AuthService(
 {
     public async Task<AuthResponse> LoginAsync(string email, string password, CancellationToken cancellationToken = default)
     {
-        // Busca el usuario en todas las tablas. 
-        User? user = await unitOfWork.Patients.FirstOrDefaultAsync(patient => patient.Email == email, cancellationToken)
-            ?? (User?)await unitOfWork.Doctors.FirstOrDefaultAsync(doctor => doctor.Email == email, cancellationToken)
+        // Busca el usuario en todas las tablas excepto en Patients porque no tienen acceso al sistema 
+        User? user = await unitOfWork.Doctors.FirstOrDefaultAsync(doctor => doctor.Email == email, cancellationToken)
             ?? (User?)await unitOfWork.Receptionists.FirstOrDefaultAsync(receptionist => receptionist.Email == email, cancellationToken)
             ?? (User?)await unitOfWork.Administrators.FirstOrDefaultAsync(admin => admin.Email == email, cancellationToken);
 
         if (user is null)
+        {
+            var isPatient = await unitOfWork.Patients.AnyAsync(patient => patient.Email == email, cancellationToken);
+            if (isPatient) throw new ForbiddenException("Patients cannot log in to the system.");
+            
             throw new NotFoundException("User", email);
+        }
 
 
         var doctor = await unitOfWork.Doctors.FirstOrDefaultAsync(d => d.Email == email, cancellationToken);
@@ -67,7 +71,9 @@ public class AuthService(
     private string GenerateToken(User user)
     {
         // convierte la clave secreta y la pasa a bytes, porque el hasheo HmacSha256 no lee texto, solo bytes
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]!));
+        var jwtKey = configuration["Jwt:Key"];
+        if (string.IsNullOrEmpty(jwtKey)) jwtKey = "YourSuperSecretKeyThatIsAtLeast32CharsLong!!";
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         // Las claims son los datos del usuario que van a viajar dentro del token (el id, el Role, y el email).

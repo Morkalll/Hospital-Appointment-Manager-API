@@ -36,12 +36,14 @@ public class AppointmentService(IUnitOfWork unitOfWork) : IAppointmentService
         if (appointment == null)
             throw new ValidationException("There is no available appointment for the selected doctor at that time.");
 
+        if (appointment.RoomId != roomId)
+            throw new ValidationException("The selected room does not match the available appointment.");
+
         appointment.AssignPatient(patientId);
 
-        // Se asignan las propiedades de navegación (para hacer: 'Patient.[]' 'Doctor.[]' 'Room.[]') 
+        // Se asignan las propiedades de navegación
         appointment.Patient = patient;
         appointment.Doctor = doctor;
-        appointment.Room = room;
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

@@ -25,7 +25,7 @@ public class MedicalHistoryService(IUnitOfWork unitOfWork) : IMedicalHistoryServ
             ?? throw new NotFoundException(nameof(Appointment), appointmentId);
 
         if (appointment.State != AppointmentState.Completed)
-            throw new ValidationException("Medical history can only be added to confirmed appointments.");
+            throw new ValidationException("Medical history can only be added to completed appointments.");
 
         if (appointment.MedicalHistory is not null)
             throw new ValidationException("A medical history already exists for this appointment.");
