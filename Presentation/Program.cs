@@ -20,7 +20,19 @@ builder.Services.AddControllers()
 var app = builder.Build();
 
 // Siempre inicializar la DB para el TPI, sin importar si es Dev o Producción
-await app.InitialiseDatabaseAsync();
+try
+{
+    using var scope = app.Services.CreateScope();
+    var initialiser = scope.ServiceProvider.GetRequiredService<ApplicationDbContextInitialiser>();
+    await initialiser.InitialiseAsync();
+    await initialiser.SeedAsync();
+    app.Logger.LogInformation("Database initialized successfully.");
+}
+catch (Exception ex)
+{
+    app.Logger.LogError(ex, "An error occurred during database initialization.");
+    // No lanzamos la excepcion para que la API no se muera y podamos ver el error real al llamar endpoints
+}
 
 if (!app.Environment.IsDevelopment())
 {
