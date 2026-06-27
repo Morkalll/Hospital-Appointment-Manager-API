@@ -21,7 +21,6 @@ builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
-// Siempre inicializar la DB para el TPI, sin importar si es Dev o Producción
 try
 {
     using var scope = app.Services.CreateScope();
@@ -33,7 +32,6 @@ try
 catch (Exception ex)
 {
     app.Logger.LogError(ex, "An error occurred during database initialization.");
-    // No lanzamos la excepcion para que la API no se muera y podamos ver el error real al llamar endpoints
 }
 
 if (!app.Environment.IsDevelopment())

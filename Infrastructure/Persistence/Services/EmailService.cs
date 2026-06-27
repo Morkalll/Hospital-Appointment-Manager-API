@@ -23,19 +23,16 @@ public class EmailService : IEmailService
     {
         var client = _httpClientFactory.CreateClient("ResendClient");
 
-        // Arma el objeto JSON según la documentación de Resend
         var emailPayload = new
         {
             from = _configuration["EmailSettings:From"] ?? "onboarding@resend.dev",
-            to = new[] { messageDestinatory }, //Crea un array y agrego el string 
+            to = new[] { messageDestinatory },
             subject = messageSubject,
             html = messageBody
         };
 
-        // Envía la petición POST al endpoint de Resend
         var response = await client.PostAsJsonAsync("emails", emailPayload, cancellationToken);
 
-        // Lanza una excepción si la respuesta no es exitosa 
         if (!response.IsSuccessStatusCode)
         {
             var errorResponse = await response.Content.ReadAsStringAsync(cancellationToken);

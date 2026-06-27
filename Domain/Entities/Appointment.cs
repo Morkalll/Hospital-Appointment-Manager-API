@@ -13,7 +13,6 @@ public class Appointment : BaseEntity
     public DateTime DateTime { get; private set; }
     public AppointmentState State { get; private set; } = AppointmentState.Available;
 
-    // Navigation
     public Patient? Patient { get; set; }
     public Doctor? Doctor { get; set; }
     public Room? Room { get; set; }

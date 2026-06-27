@@ -22,7 +22,6 @@ public class AuthService(
 {
     public async Task<AuthResponse> LoginAsync(string email, string password, CancellationToken cancellationToken = default)
     {
-        // Busca el usuario en todas las tablas excepto en Patients porque no tienen acceso al sistema 
         User? user = await unitOfWork.Doctors.FirstOrDefaultAsync(doctor => doctor.Email == email, cancellationToken)
             ?? (User?)await unitOfWork.Receptionists.FirstOrDefaultAsync(receptionist => receptionist.Email == email, cancellationToken)
             ?? (User?)await unitOfWork.Administrators.FirstOrDefaultAsync(admin => admin.Email == email, cancellationToken);
@@ -54,7 +53,6 @@ public class AuthService(
     private AuthResponse AuthenticateAndBuildResponse<T>(T user, string hashedPassword, string plainPassword, IPasswordHasher<T> hasher)
     where T : User
     {
-        // compara password con el hash guardado en la base de datos, en caso de ser PasswordVerificationResult.Failed, tira una excepcion
         var result = hasher.VerifyHashedPassword(user, hashedPassword, plainPassword);
         if (result == PasswordVerificationResult.Failed)
             throw new ForbiddenException("Invalid credentials.");
@@ -70,13 +68,11 @@ public class AuthService(
 
     private string GenerateToken(User user)
     {
-        // convierte la clave secreta y la pasa a bytes, porque el hasheo HmacSha256 no lee texto, solo bytes
         var jwtKey = configuration["Jwt:Key"];
         if (string.IsNullOrEmpty(jwtKey)) jwtKey = "YourSuperSecretKeyThatIsAtLeast32CharsLong!!";
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-        // Las claims son los datos del usuario que van a viajar dentro del token (el id, el Role, y el email).
         var claims = new[]
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
@@ -84,7 +80,6 @@ public class AuthService(
             new Claim(JwtRegisteredClaimNames.Email, user.Email)
         };
 
-        // Se genera el token con los datos necesarios.
         var token = new JwtSecurityToken(
             issuer: configuration["Jwt:Issuer"],
             audience: configuration["Jwt:Audience"],
@@ -93,7 +88,6 @@ public class AuthService(
             signingCredentials: credentials
         );
 
-        // Convierte el token a string para devolverlo al cliente (el frontend)
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 }

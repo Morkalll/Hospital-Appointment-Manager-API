@@ -101,12 +101,11 @@ public class ApplicationDbContextInitialiser
             var room = context.Rooms.First(r => r.Specialty == doctor.Specialty);
             var appointments = new List<Appointment>();
 
-            // Seed appointments for the next 7 days, 9 AM to 8 PM, every 30 mins
-            var startDate = DateTime.UtcNow.Date.AddDays(1); // Start tomorrow
+            var startDate = DateTime.UtcNow.Date.AddDays(1);
             for (int day = 0; day < 7; day++)
             {
                 var currentDate = startDate.AddDays(day);
-                for (int hour = 9; hour <= 19; hour++) // 9 AM to 7:30 PM (ends at 8 PM)
+                for (int hour = 9; hour <= 19; hour++)
                 {
                     appointments.Add(Appointment.CreateAvailable(doctor.Id, room.Id, currentDate.AddHours(hour)));
                     appointments.Add(Appointment.CreateAvailable(doctor.Id, room.Id, currentDate.AddHours(hour).AddMinutes(30)));
