@@ -17,6 +17,8 @@ builder.Services.AddPresentationServices(builder.Configuration);
 builder.Services.AddControllers()
     .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
+builder.Services.AddOpenApi();
+
 var app = builder.Build();
 
 // Siempre inicializar la DB para el TPI, sin importar si es Dev o Producción
