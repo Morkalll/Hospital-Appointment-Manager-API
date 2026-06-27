@@ -1,4 +1,4 @@
-@baseUrl = http://localhost:5163/api
+@baseUrl = https://tpi-hospital-api-e9hkdnhycfh2bxa3.centralus-01.azurewebsites.net/api
 
 ### 1. Create Patient (No Auth Required for Test Endpoint or Staff Auth)
 POST {{baseUrl}}/User/create-patient

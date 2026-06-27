@@ -1,4 +1,4 @@
-$baseUrl = "http://localhost:5163/api"
+$baseUrl = "https://tpi-hospital-api-e9hkdnhycfh2bxa3.centralus-01.azurewebsites.net/api"
 $Headers = @{ "Content-Type" = "application/json" }
 
 Write-Host "Disabling SSL validation for local tests..." -ForegroundColor Yellow
