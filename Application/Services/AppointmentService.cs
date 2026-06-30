@@ -8,7 +8,11 @@ using TPI_2026.Domain.Exceptions;
 
 namespace TPI_2026.Application.Services;
 
-public class AppointmentService(IUnitOfWork unitOfWork) : IAppointmentService
+public class AppointmentService(
+    IAppointmentRepository appointmentRepo,
+    IRepository<Patient> patientRepo,
+    IRepository<Doctor> doctorRepo,
+    IRepository<Room> roomRepo) : IAppointmentService
 {
     public async Task<Guid> CreateAsync(Guid patientId, Guid doctorId, Guid roomId, DateTime dateTime, CancellationToken cancellationToken = default)
     {
@@ -17,13 +21,13 @@ public class AppointmentService(IUnitOfWork unitOfWork) : IAppointmentService
         if (roomId == Guid.Empty) throw new ValidationException("RoomId is required.");
         if (dateTime <= DateTime.UtcNow) throw new ValidationException("Appointment date must be in the future.");
 
-        var patient = await unitOfWork.Patients.GetByIdAsync(patientId, cancellationToken)
+        var patient = await patientRepo.GetByIdAsync(patientId, cancellationToken)
             ?? throw new NotFoundException(nameof(Patient), patientId);
 
-        var room = await unitOfWork.Rooms.GetByIdAsync(roomId, cancellationToken)
+        var room = await roomRepo.GetByIdAsync(roomId, cancellationToken)
             ?? throw new NotFoundException(nameof(Room), roomId);
 
-        var doctor = await unitOfWork.Doctors.GetByIdAsync(doctorId, cancellationToken)
+        var doctor = await doctorRepo.GetByIdAsync(doctorId, cancellationToken)
             ?? throw new NotFoundException(nameof(Doctor), doctorId);
 
         if (!doctor.IsAvailable)
@@ -32,7 +36,7 @@ public class AppointmentService(IUnitOfWork unitOfWork) : IAppointmentService
         if (doctor.Specialty != room.Specialty)
             throw new ValidationException("The doctor's specialty does not match with the room's specialty.");
 
-        var appointment = await unitOfWork.Appointments.GetAvailableAsync(doctorId, dateTime, cancellationToken);
+        var appointment = await appointmentRepo.GetAvailableAsync(doctorId, dateTime, cancellationToken);
         if (appointment == null)
             throw new ValidationException("There is no available appointment for the selected doctor at that time.");
 
@@ -45,14 +49,14 @@ public class AppointmentService(IUnitOfWork unitOfWork) : IAppointmentService
         appointment.Patient = patient;
         appointment.Doctor = doctor;
 
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await appointmentRepo.UpdateAsync(appointment, cancellationToken);
 
         return appointment.Id;
     }
 
     public async Task CancelAsync(Guid appointmentId, CancellationToken cancellationToken = default)
     {
-        var appointment = await unitOfWork.Appointments.GetByIdAsync(appointmentId, cancellationToken)
+        var appointment = await appointmentRepo.GetByIdAsync(appointmentId, cancellationToken)
             ?? throw new NotFoundException(nameof(Appointment), appointmentId);
 
         if (!appointment.IsCancelable())
@@ -60,12 +64,12 @@ public class AppointmentService(IUnitOfWork unitOfWork) : IAppointmentService
 
         appointment.ChangeState(AppointmentState.Canceled);
 
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await appointmentRepo.UpdateAsync(appointment, cancellationToken);
     }
 
     public async Task CompletionAsync(Guid appointmentId, CancellationToken cancellationToken = default)
     {
-        var appointment = await unitOfWork.Appointments.GetByIdAsync(appointmentId, cancellationToken)
+        var appointment = await appointmentRepo.GetByIdAsync(appointmentId, cancellationToken)
         ?? throw new NotFoundException(nameof(Appointment), appointmentId);
 
         if (!appointment.IsCompleteable())
@@ -73,12 +77,12 @@ public class AppointmentService(IUnitOfWork unitOfWork) : IAppointmentService
 
         appointment.ChangeState(AppointmentState.Completed);
 
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await appointmentRepo.UpdateAsync(appointment, cancellationToken);
     }
 
     public async Task<List<AppointmentDto>> GetByPatientAsync(Guid patientId, CancellationToken cancellationToken = default)
     {
-        var appointments = await unitOfWork.Appointments.GetByPatientIdAsync(patientId, cancellationToken);
+        var appointments = await appointmentRepo.GetByPatientIdAsync(patientId, cancellationToken);
 
         return appointments
         .Select(appointment => new AppointmentDto(

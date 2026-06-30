@@ -11,7 +11,7 @@ namespace Application.UnitTests;
 [TestFixture]
 public class AppointmentServiceTests
 {
-    private Mock<IUnitOfWork> _unitOfWorkMock;
+    // Removed _unitOfWorkMock
     private Mock<IRepository<Patient>> _patientRepoMock;
     private Mock<IRepository<Doctor>> _doctorRepoMock;
     private Mock<IRepository<Room>> _roomRepoMock;
@@ -21,18 +21,20 @@ public class AppointmentServiceTests
     [SetUp]
     public void Setup()
     {
-        _unitOfWorkMock = new Mock<IUnitOfWork>();
+        // Removed _unitOfWorkMock init
         _patientRepoMock = new Mock<IRepository<Patient>>();
         _doctorRepoMock = new Mock<IRepository<Doctor>>();
         _roomRepoMock = new Mock<IRepository<Room>>();
         _appointmentRepoMock = new Mock<IAppointmentRepository>();
 
-        _unitOfWorkMock.Setup(u => u.Patients).Returns(_patientRepoMock.Object);
-        _unitOfWorkMock.Setup(u => u.Doctors).Returns(_doctorRepoMock.Object);
-        _unitOfWorkMock.Setup(u => u.Rooms).Returns(_roomRepoMock.Object);
-        _unitOfWorkMock.Setup(u => u.Appointments).Returns(_appointmentRepoMock.Object);
+        // Removed _unitOfWorkMock setup
 
-        _appointmentService = new AppointmentService(_unitOfWorkMock.Object);
+        _appointmentService = new AppointmentService(
+            _appointmentRepoMock.Object,
+            _patientRepoMock.Object,
+            _doctorRepoMock.Object,
+            _roomRepoMock.Object
+        );
     }
 
     [Test]
@@ -92,7 +94,7 @@ public class AppointmentServiceTests
 
         // Assert
         Assert.That(resultId, Is.Not.EqualTo(Guid.Empty));
-        _unitOfWorkMock.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+        _appointmentRepoMock.Verify(r => r.UpdateAsync(It.IsAny<Appointment>(), It.IsAny<CancellationToken>()), Times.Once);
         Assert.That(appointment.PatientId, Is.EqualTo(patientId));
     }
 }

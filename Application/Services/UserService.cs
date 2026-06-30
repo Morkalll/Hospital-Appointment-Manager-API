@@ -10,29 +10,32 @@ using TPI_2026.Application.Abstractions.Interfaces.Repositories;
 namespace TPI_2026.Application.Services;
 
 public class UserService(
-    IUnitOfWork unitOfWork,
+    IRepository<Patient> patientRepo,
+    IRepository<Doctor> doctorRepo,
+    IRepository<Receptionist> receptionistRepo,
+    IRepository<Administrator> adminRepo,
     IPasswordHasher<Doctor> doctorHasher,
     IPasswordHasher<Receptionist> receptionistHasher,
     IPasswordHasher<Administrator> adminHasher) : IUserService
 {
     public async Task<List<UserDto>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        var patientsList = await unitOfWork.Patients.GetAllAsync(cancellationToken);
+        var patientsList = await patientRepo.GetAllAsync(cancellationToken);
         var patients = patientsList
             .Select(patient => new UserDto(patient.Id, patient.Name, patient.Email, patient.Role.ToString()))
             .ToList();
 
-        var doctorsList = await unitOfWork.Doctors.GetAllAsync(cancellationToken);
+        var doctorsList = await doctorRepo.GetAllAsync(cancellationToken);
         var doctors = doctorsList
             .Select(doctor => new UserDto(doctor.Id, doctor.Name, doctor.Email, doctor.Role.ToString()))
             .ToList();
 
-        var receptionistsList = await unitOfWork.Receptionists.GetAllAsync(cancellationToken);
+        var receptionistsList = await receptionistRepo.GetAllAsync(cancellationToken);
         var receptionists = receptionistsList
             .Select(receptionist => new UserDto(receptionist.Id, receptionist.Name, receptionist.Email, receptionist.Role.ToString()))
             .ToList();
 
-        var administratorsList = await unitOfWork.Administrators.GetAllAsync(cancellationToken);
+        var administratorsList = await adminRepo.GetAllAsync(cancellationToken);
         var administrators = administratorsList
             .Select(admin => new UserDto(admin.Id, admin.Name, admin.Email, admin.Role.ToString()))
             .ToList();
@@ -48,19 +51,19 @@ public class UserService(
 
     public async Task<UserDto> GetByIdAsync(Guid userId, CancellationToken cancellationToken = default)
     {
-        var patient = await unitOfWork.Patients.FirstOrDefaultAsync(patient => patient.Id == userId, cancellationToken);
+        var patient = await patientRepo.FirstOrDefaultAsync(patient => patient.Id == userId, cancellationToken);
         if (patient is not null)
             return new UserDto(patient.Id, patient.Name, patient.Email, patient.Role.ToString());
 
-        var doctor = await unitOfWork.Doctors.FirstOrDefaultAsync(doctor => doctor.Id == userId, cancellationToken);
+        var doctor = await doctorRepo.FirstOrDefaultAsync(doctor => doctor.Id == userId, cancellationToken);
         if (doctor is not null)
             return new UserDto(doctor.Id, doctor.Name, doctor.Email, doctor.Role.ToString());
 
-        var receptionist = await unitOfWork.Receptionists.FirstOrDefaultAsync(receptionist => receptionist.Id == userId, cancellationToken);
+        var receptionist = await receptionistRepo.FirstOrDefaultAsync(receptionist => receptionist.Id == userId, cancellationToken);
         if (receptionist is not null)
             return new UserDto(receptionist.Id, receptionist.Name, receptionist.Email, receptionist.Role.ToString());
 
-        var admin = await unitOfWork.Administrators.FirstOrDefaultAsync(admin => admin.Id == userId, cancellationToken);
+        var admin = await adminRepo.FirstOrDefaultAsync(admin => admin.Id == userId, cancellationToken);
         if (admin is not null)
             return new UserDto(admin.Id, admin.Name, admin.Email, admin.Role.ToString());
 
@@ -80,14 +83,14 @@ public class UserService(
         if (string.IsNullOrWhiteSpace(email)) throw new ValidationException("Email is required.");
         if (string.IsNullOrWhiteSpace(dni)) throw new ValidationException("DNI is required.");
 
-        if (await unitOfWork.Patients.AnyAsync(patient => patient.Dni == dni, cancellationToken))
+        if (await patientRepo.AnyAsync(patient => patient.Dni == dni, cancellationToken))
             throw new ValidationException("A patient with that DNI already exists.");
 
 
-        if (await unitOfWork.Patients.AnyAsync(patient => patient.Email == email, cancellationToken) ||
-            await unitOfWork.Doctors.AnyAsync(doctor => doctor.Email == email, cancellationToken) ||
-            await unitOfWork.Receptionists.AnyAsync(receptionist => receptionist.Email == email, cancellationToken) ||
-            await unitOfWork.Administrators.AnyAsync(admin => admin.Email == email, cancellationToken))
+        if (await patientRepo.AnyAsync(patient => patient.Email == email, cancellationToken) ||
+            await doctorRepo.AnyAsync(doctor => doctor.Email == email, cancellationToken) ||
+            await receptionistRepo.AnyAsync(receptionist => receptionist.Email == email, cancellationToken) ||
+            await adminRepo.AnyAsync(admin => admin.Email == email, cancellationToken))
         {
             throw new ValidationException("A user with that email already exists.");
         }
@@ -102,8 +105,7 @@ public class UserService(
             Address = address
         };
 
-        unitOfWork.Patients.Add(patient);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await patientRepo.AddAsync(patient, cancellationToken);
         return patient.Id;
     }
 
@@ -120,15 +122,15 @@ public class UserService(
         if (string.IsNullOrWhiteSpace(password)) throw new ValidationException("Password is required.");
         if (string.IsNullOrWhiteSpace(credential)) throw new ValidationException("Credential is required.");
 
-        if (await unitOfWork.Patients.AnyAsync(patient => patient.Email == email, cancellationToken) ||
-            await unitOfWork.Doctors.AnyAsync(doctor => doctor.Email == email, cancellationToken) ||
-            await unitOfWork.Receptionists.AnyAsync(receptionist => receptionist.Email == email, cancellationToken) ||
-            await unitOfWork.Administrators.AnyAsync(admin => admin.Email == email, cancellationToken))
+        if (await patientRepo.AnyAsync(patient => patient.Email == email, cancellationToken) ||
+            await doctorRepo.AnyAsync(doctor => doctor.Email == email, cancellationToken) ||
+            await receptionistRepo.AnyAsync(receptionist => receptionist.Email == email, cancellationToken) ||
+            await adminRepo.AnyAsync(admin => admin.Email == email, cancellationToken))
         {
             throw new ValidationException("A user with that email already exists.");
         }
 
-        if (await unitOfWork.Doctors.AnyAsync(doctor => doctor.Credential == credential, cancellationToken))
+        if (await doctorRepo.AnyAsync(doctor => doctor.Credential == credential, cancellationToken))
             throw new ValidationException("A doctor with that credential already exists.");
 
         var doctor = new Doctor
@@ -140,8 +142,7 @@ public class UserService(
         };
         doctor.Password = doctorHasher.HashPassword(doctor, password);
 
-        unitOfWork.Doctors.Add(doctor);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await doctorRepo.AddAsync(doctor, cancellationToken);
         return doctor.Id;
     }
 
@@ -161,15 +162,15 @@ public class UserService(
         if (string.IsNullOrWhiteSpace(workingShift)) throw new ValidationException("Working shift is required.");
         if (string.IsNullOrWhiteSpace(area)) throw new ValidationException("Area is required.");
 
-        if (await unitOfWork.Patients.AnyAsync(patient => patient.Email == email, cancellationToken) ||
-            await unitOfWork.Doctors.AnyAsync(doctor => doctor.Email == email, cancellationToken) ||
-            await unitOfWork.Receptionists.AnyAsync(receptionist => receptionist.Email == email, cancellationToken) ||
-            await unitOfWork.Administrators.AnyAsync(admin => admin.Email == email, cancellationToken))
+        if (await patientRepo.AnyAsync(patient => patient.Email == email, cancellationToken) ||
+            await doctorRepo.AnyAsync(doctor => doctor.Email == email, cancellationToken) ||
+            await receptionistRepo.AnyAsync(receptionist => receptionist.Email == email, cancellationToken) ||
+            await adminRepo.AnyAsync(admin => admin.Email == email, cancellationToken))
         {
             throw new ValidationException("A user with that email already exists.");
         }
 
-        if (await unitOfWork.Receptionists.AnyAsync(receptionist => receptionist.EmployeeNumber == employeeNumber, cancellationToken))
+        if (await receptionistRepo.AnyAsync(receptionist => receptionist.EmployeeNumber == employeeNumber, cancellationToken))
             throw new ValidationException("A user with that employee number already exists.");
 
         var receptionist = new Receptionist
@@ -183,8 +184,7 @@ public class UserService(
 
         receptionist.Password = receptionistHasher.HashPassword(receptionist, password);
 
-        unitOfWork.Receptionists.Add(receptionist);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await receptionistRepo.AddAsync(receptionist, cancellationToken);
         return receptionist.Id;
     }
 
@@ -198,10 +198,10 @@ public class UserService(
         if (string.IsNullOrWhiteSpace(email)) throw new ValidationException("Email is required.");
         if (string.IsNullOrWhiteSpace(password)) throw new ValidationException("Password is required.");
 
-        if (await unitOfWork.Patients.AnyAsync(patient => patient.Email == email, cancellationToken) ||
-            await unitOfWork.Doctors.AnyAsync(doctor => doctor.Email == email, cancellationToken) ||
-            await unitOfWork.Receptionists.AnyAsync(receptionist => receptionist.Email == email, cancellationToken) ||
-            await unitOfWork.Administrators.AnyAsync(admin => admin.Email == email, cancellationToken))
+        if (await patientRepo.AnyAsync(patient => patient.Email == email, cancellationToken) ||
+            await doctorRepo.AnyAsync(doctor => doctor.Email == email, cancellationToken) ||
+            await receptionistRepo.AnyAsync(receptionist => receptionist.Email == email, cancellationToken) ||
+            await adminRepo.AnyAsync(admin => admin.Email == email, cancellationToken))
         {
             throw new ValidationException("A user with that email already exists.");
         }
@@ -215,43 +215,42 @@ public class UserService(
 
         administrator.Password = adminHasher.HashPassword(administrator, password);
 
-        unitOfWork.Administrators.Add(administrator);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await adminRepo.AddAsync(administrator, cancellationToken);
         return administrator.Id;
     }
 
     public async Task DeleteAsync(Guid userId, CancellationToken cancellationToken = default)
     {
-        var patient = await unitOfWork.Patients.GetByIdAsync(userId, cancellationToken);
+        var patient = await patientRepo.GetByIdAsync(userId, cancellationToken);
         if (patient is not null)
         {
             patient.IsDeleted = true;
-            await unitOfWork.SaveChangesAsync(cancellationToken);
+            await patientRepo.UpdateAsync(patient, cancellationToken);
             return;
         }
 
-        var doctor = await unitOfWork.Doctors.GetByIdAsync(userId, cancellationToken);
+        var doctor = await doctorRepo.GetByIdAsync(userId, cancellationToken);
         if (doctor is not null)
         {
             doctor.IsDeleted = true;
             doctor.IsAvailable = false;
-            await unitOfWork.SaveChangesAsync(cancellationToken);
+            await doctorRepo.UpdateAsync(doctor, cancellationToken);
             return;
         }
 
-        var receptionist = await unitOfWork.Receptionists.GetByIdAsync(userId, cancellationToken);
+        var receptionist = await receptionistRepo.GetByIdAsync(userId, cancellationToken);
         if (receptionist is not null)
         {
             receptionist.IsDeleted = true;
-            await unitOfWork.SaveChangesAsync(cancellationToken);
+            await receptionistRepo.UpdateAsync(receptionist, cancellationToken);
             return;
         }
 
-        var admin = await unitOfWork.Administrators.GetByIdAsync(userId, cancellationToken);
+        var admin = await adminRepo.GetByIdAsync(userId, cancellationToken);
         if (admin is not null)
         {
             admin.IsDeleted = true;
-            await unitOfWork.SaveChangesAsync(cancellationToken);
+            await adminRepo.UpdateAsync(admin, cancellationToken);
             return;
         }
 

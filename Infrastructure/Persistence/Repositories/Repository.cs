@@ -32,9 +32,22 @@ public class Repository<T> : IRepository<T> where T : BaseEntity
         => await DbSet.AnyAsync(predicate, cancellationToken);
 
 
-    public void Add(T entity)
+    public async Task AddAsync(T entity, CancellationToken cancellationToken = default)
     {
-        DbSet.Add(entity);
+        await DbSet.AddAsync(entity, cancellationToken);
+        await dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task UpdateAsync(T entity, CancellationToken cancellationToken = default)
+    {
+        DbSet.Update(entity);
+        await dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task DeleteAsync(T entity, CancellationToken cancellationToken = default)
+    {
+        DbSet.Remove(entity);
+        await dbContext.SaveChangesAsync(cancellationToken);
     }
 }
 

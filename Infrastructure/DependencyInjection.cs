@@ -26,7 +26,9 @@ public static class DependencyInjection
             options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
         services.AddScoped<DbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
-        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+        services.AddScoped<IAppointmentRepository, AppointmentRepository>();
+        services.AddScoped<IMedicalHistoryRepository, MedicalHistoryRepository>();
         services.AddScoped<ApplicationDbContextInitialiser>();
         services.AddScoped<IPasswordHasher<Doctor>, BCryptPasswordHasher<Doctor>>();
         services.AddScoped<IPasswordHasher<Receptionist>, BCryptPasswordHasher<Receptionist>>();
