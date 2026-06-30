@@ -1,16 +1,16 @@
-﻿using TPI_2026.Domain.Entities;
+using TPI_2026.Domain.Entities;
 using TPI_2026.Domain.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using BCrypt.Net;
 
 namespace TPI_2026.Infrastructure.Persistence;
 
 public class ApplicationDbContextInitialiser
 (
     ILogger<ApplicationDbContextInitialiser> logger,
-    ApplicationDbContext context,
-    IPasswordHasher<Administrator> hasher
+    ApplicationDbContext context
 )
 
 {
@@ -52,7 +52,7 @@ public class ApplicationDbContextInitialiser
                 CreatedAt = now,
                 UpdatedAt = now
             };
-            admin.Password = hasher.HashPassword(admin, "Admin1234!");
+            admin.Password = BCrypt.Net.BCrypt.HashPassword("Admin1234!");
 
             context.Administrators.Add(admin);
             await context.SaveChangesAsync();
@@ -75,6 +75,46 @@ public class ApplicationDbContextInitialiser
             context.Rooms.AddRange(rooms);
             await context.SaveChangesAsync();
             logger.LogInformation("Initial rooms created.");
+        }
+
+        if (!context.Doctors.Any())
+        {
+            var now = DateTime.UtcNow;
+            var doctor = new Doctor
+            {
+                Name = "Dr. Smith",
+                Email = "smith@hospital.com",
+                Specialty = Specialty.Cardiology,
+                CreatedAt = now,
+                UpdatedAt = now
+            };
+            doctor.Password = BCrypt.Net.BCrypt.HashPassword("Doctor1234!");
+            context.Doctors.Add(doctor);
+            await context.SaveChangesAsync();
+            logger.LogInformation("Initial doctor created.");
+        }
+
+        if (!context.Appointments.Any())
+        {
+            var now = DateTime.UtcNow;
+            var doctor = context.Doctors.First();
+            var room = context.Rooms.First(r => r.Specialty == doctor.Specialty);
+            var appointments = new List<Appointment>();
+
+            var startDate = DateTime.UtcNow.Date.AddDays(1);
+            for (int day = 0; day < 7; day++)
+            {
+                var currentDate = startDate.AddDays(day);
+                for (int hour = 9; hour <= 19; hour++)
+                {
+                    appointments.Add(Appointment.CreateAvailable(doctor.Id, room.Id, currentDate.AddHours(hour)));
+                    appointments.Add(Appointment.CreateAvailable(doctor.Id, room.Id, currentDate.AddHours(hour).AddMinutes(30)));
+                }
+            }
+
+            context.Appointments.AddRange(appointments);
+            await context.SaveChangesAsync();
+            logger.LogInformation("Initial available appointments created.");
         }
     }
 }

@@ -17,13 +17,24 @@ builder.Services.AddPresentationServices(builder.Configuration);
 builder.Services.AddControllers()
     .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
+builder.Services.AddOpenApi();
+
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+try
 {
-    await app.InitialiseDatabaseAsync();
+    using var scope = app.Services.CreateScope();
+    var initialiser = scope.ServiceProvider.GetRequiredService<ApplicationDbContextInitialiser>();
+    await initialiser.InitialiseAsync();
+    await initialiser.SeedAsync();
+    app.Logger.LogInformation("Database initialized successfully.");
 }
-else
+catch (Exception ex)
+{
+    app.Logger.LogError(ex, "An error occurred during database initialization.");
+}
+
+if (!app.Environment.IsDevelopment())
 {
     app.UseHsts();
 }

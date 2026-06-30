@@ -42,30 +42,12 @@ public class AppointmentRepository : Repository<Appointment>, IAppointmentReposi
             .Include(appointment => appointment.Room)
             .ToListAsync(cancellationToken);
     }
-
-    public async Task<bool> HasOverlapAsync(Guid doctorId, DateTime dateTime, CancellationToken cancellationToken = default)
+    public async Task<Appointment?> GetAvailableAsync(Guid doctorId, DateTime dateTime, CancellationToken cancellationToken = default)
     {
-        var startWindow = dateTime.AddMinutes(-30);
-        var endWindow = dateTime.AddMinutes(30);
-
-        return await DbSet.AnyAsync(appointment =>
+        return await DbSet.FirstOrDefaultAsync(appointment =>
             appointment.DoctorId == doctorId
-            && appointment.DateTime > startWindow
-            && appointment.DateTime < endWindow
-            && appointment.State != AppointmentState.Canceled,
-            cancellationToken);
-    }
-
-    public async Task<bool> HasRoomOverlapAsync(Guid roomId, DateTime dateTime, CancellationToken cancellationToken = default)
-    {
-        var startWindow = dateTime.AddMinutes(-30);
-        var endWindow = dateTime.AddMinutes(30);
-
-        return await DbSet.AnyAsync(appointment =>
-            appointment.RoomId == roomId
-            && appointment.DateTime > startWindow
-            && appointment.DateTime < endWindow
-            && appointment.State != AppointmentState.Canceled,
+            && appointment.DateTime == dateTime
+            && appointment.State == AppointmentState.Available,
             cancellationToken);
     }
 }

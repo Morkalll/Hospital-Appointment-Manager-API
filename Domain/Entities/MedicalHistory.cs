@@ -10,7 +10,6 @@ public class MedicalHistory : BaseEntity
     public string Diagnostic { get; set; } = string.Empty;
     public DateTime DateTime { get; set; }
 
-    // Navigation
     public Appointment? Appointment { get; set; }
     public Patient? Patient { get; set; }
 
@@ -19,4 +18,3 @@ public class MedicalHistory : BaseEntity
     public string GetSummary()
         => $"Turno: {DateTime:dd/MM/yyyy HH:mm} | Diagnóstico: {Diagnostic}";
 }
-
