@@ -7,12 +7,13 @@ namespace TPI_2026.Domain.Entities;
 
 public class Appointment : BaseEntity
 {
-    public Guid? PatientId { get; private set; }
+    public Guid PatientId { get; private set; }
     public Guid DoctorId { get; private set; }
     public Guid RoomId { get; private set; }
     public DateTime DateTime { get; private set; }
-    public AppointmentState State { get; private set; } = AppointmentState.Available;
+    public AppointmentState State { get; private set; } = AppointmentState.Confirmed;
 
+    // Navigation
     public Patient? Patient { get; set; }
     public Doctor? Doctor { get; set; }
     public Room? Room { get; set; }
@@ -20,25 +21,19 @@ public class Appointment : BaseEntity
 
     private Appointment() { }
 
-    public static Appointment CreateAvailable(Guid doctorId, Guid roomId, DateTime dateTime)
+    public static Appointment Create(Guid patientId, Guid doctorId, Guid roomId, DateTime dateTime)
     {
         var appointment = new Appointment
         {
-            PatientId = null,
+            PatientId = patientId,
             DoctorId = doctorId,
             RoomId = roomId,
             DateTime = dateTime,
-            State = AppointmentState.Available
+            State = AppointmentState.Confirmed
         };
 
+        appointment.AddDomainEvent(new AppointmentCreatedEvent(appointment));
         return appointment;
-    }
-
-    public void AssignPatient(Guid patientId)
-    {
-        PatientId = patientId;
-        ChangeState(AppointmentState.Confirmed);
-        AddDomainEvent(new AppointmentCreatedEvent(this));
     }
 
     public void ChangeState(AppointmentState newState)

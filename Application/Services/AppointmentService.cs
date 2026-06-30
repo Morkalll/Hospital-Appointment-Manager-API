@@ -21,6 +21,15 @@ public class AppointmentService(
         if (roomId == Guid.Empty) throw new ValidationException("RoomId is required.");
         if (dateTime <= DateTime.UtcNow) throw new ValidationException("Appointment date must be in the future.");
 
+        if (dateTime.Hour < 9 || dateTime.Hour >= 20 || (dateTime.Hour == 20 && dateTime.Minute > 0))
+            throw new ValidationException("Appointments can only be scheduled between 09:00 and 20:00.");
+
+        if (dateTime.Minute != 0 && dateTime.Minute != 30)
+            throw new ValidationException("Appointments must be scheduled precisely on the hour or half-hour (e.g., 09:00 or 09:30).");
+
+        if (dateTime.Second != 0 || dateTime.Millisecond != 0)
+            throw new ValidationException("Appointments must have 0 seconds and milliseconds.");
+
         var patient = await patientRepo.GetByIdAsync(patientId, cancellationToken)
             ?? throw new NotFoundException(nameof(Patient), patientId);
 
@@ -36,20 +45,24 @@ public class AppointmentService(
         if (doctor.Specialty != room.Specialty)
             throw new ValidationException("The doctor's specialty does not match with the room's specialty.");
 
-        var appointment = await appointmentRepo.GetAvailableAsync(doctorId, dateTime, cancellationToken);
-        if (appointment == null)
-            throw new ValidationException("There is no available appointment for the selected doctor at that time.");
+        if (await appointmentRepo.HasDoctorOverlapAsync(doctorId, dateTime, cancellationToken))
+            throw new ValidationException("The doctor already has an appointment assigned at that time.");
 
-        if (appointment.RoomId != roomId)
-            throw new ValidationException("The selected room does not match the available appointment.");
+        if (await appointmentRepo.HasRoomOverlapAsync(roomId, dateTime, cancellationToken))
+            throw new ValidationException("The room is already booked for another appointment at that time.");
 
-        appointment.AssignPatient(patientId);
+        var appointment = Appointment.Create(
+            patientId,
+            doctorId,
+            roomId,
+            dateTime);
 
-
+        // Se asignan las propiedades de navegación (para hacer: 'Patient.[]' 'Doctor.[]' 'Room.[]') 
         appointment.Patient = patient;
         appointment.Doctor = doctor;
+        appointment.Room = room;
 
-        await appointmentRepo.UpdateAsync(appointment, cancellationToken);
+        await appointmentRepo.AddAsync(appointment, cancellationToken);
 
         return appointment.Id;
     }
