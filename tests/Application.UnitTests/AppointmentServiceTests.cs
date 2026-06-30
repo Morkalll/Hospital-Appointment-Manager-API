@@ -38,33 +38,19 @@ public class AppointmentServiceTests
     }
 
     [Test]
-    public void CreateAsync_WhenRoomMismatch_ThrowsValidationException()
+    public void CreateAsync_WhenDateTimeIsInvalid_ThrowsValidationException()
     {
         // Arrange
         var patientId = Guid.NewGuid();
         var doctorId = Guid.NewGuid();
         var roomId = Guid.NewGuid();
-        var otherRoomId = Guid.NewGuid();
-        var dateTime = DateTime.UtcNow.AddDays(1);
-
-        var patient = new Patient { Id = patientId, Name = "Test Patient" };
-        var room = new Room { Id = roomId, Specialty = Specialty.Cardiology };
-        var doctor = new Doctor { Id = doctorId, Specialty = Specialty.Cardiology, IsAvailable = true };
-
-        _patientRepoMock.Setup(r => r.GetByIdAsync(patientId, It.IsAny<CancellationToken>())).ReturnsAsync(patient);
-        _roomRepoMock.Setup(r => r.GetByIdAsync(roomId, It.IsAny<CancellationToken>())).ReturnsAsync(room);
-        _doctorRepoMock.Setup(r => r.GetByIdAsync(doctorId, It.IsAny<CancellationToken>())).ReturnsAsync(doctor);
-
-        // The appointment is in a DIFFERENT room
-        var appointment = Appointment.CreateAvailable(doctorId, otherRoomId, dateTime);
-        _appointmentRepoMock.Setup(r => r.GetAvailableAsync(doctorId, dateTime, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(appointment);
+        var dateTime = DateTime.UtcNow.AddDays(1).Date.AddHours(8); // 8 AM is invalid
 
         // Act & Assert
         var ex = Assert.ThrowsAsync<ValidationException>(async () =>
             await _appointmentService.CreateAsync(patientId, doctorId, roomId, dateTime));
             
-        Assert.That(ex.Message, Is.EqualTo("The selected room does not match the available appointment."));
+        Assert.That(ex.Message, Is.EqualTo("Appointments can only be scheduled between 09:00 and 20:00."));
     }
 
     [Test]
@@ -74,7 +60,7 @@ public class AppointmentServiceTests
         var patientId = Guid.NewGuid();
         var doctorId = Guid.NewGuid();
         var roomId = Guid.NewGuid();
-        var dateTime = DateTime.UtcNow.AddDays(1);
+        var dateTime = DateTime.UtcNow.AddDays(1).Date.AddHours(10); // 10 AM is valid
 
         var patient = new Patient { Id = patientId, Name = "Test Patient" };
         var room = new Room { Id = roomId, Specialty = Specialty.Cardiology };
@@ -84,17 +70,14 @@ public class AppointmentServiceTests
         _roomRepoMock.Setup(r => r.GetByIdAsync(roomId, It.IsAny<CancellationToken>())).ReturnsAsync(room);
         _doctorRepoMock.Setup(r => r.GetByIdAsync(doctorId, It.IsAny<CancellationToken>())).ReturnsAsync(doctor);
 
-        // The appointment is in the SAME room
-        var appointment = Appointment.CreateAvailable(doctorId, roomId, dateTime);
-        _appointmentRepoMock.Setup(r => r.GetAvailableAsync(doctorId, dateTime, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(appointment);
+        _appointmentRepoMock.Setup(r => r.HasDoctorOverlapAsync(doctorId, dateTime, It.IsAny<CancellationToken>())).ReturnsAsync(false);
+        _appointmentRepoMock.Setup(r => r.HasRoomOverlapAsync(roomId, dateTime, It.IsAny<CancellationToken>())).ReturnsAsync(false);
 
         // Act
         var resultId = await _appointmentService.CreateAsync(patientId, doctorId, roomId, dateTime);
 
         // Assert
         Assert.That(resultId, Is.Not.EqualTo(Guid.Empty));
-        _appointmentRepoMock.Verify(r => r.UpdateAsync(It.IsAny<Appointment>(), It.IsAny<CancellationToken>()), Times.Once);
-        Assert.That(appointment.PatientId, Is.EqualTo(patientId));
+        _appointmentRepoMock.Verify(r => r.AddAsync(It.IsAny<Appointment>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 }

@@ -38,7 +38,7 @@ public class MedicalHistoryService(
         {
             Id = Guid.NewGuid(),
             AppointmentId = appointmentId,
-            PatientId = appointment.PatientId ?? throw new ValidationException("Appointment has no patient assigned."),
+            PatientId = appointment.PatientId,
             Diagnostic = diagnostic,
             DateTime = DateTime.UtcNow
         };
