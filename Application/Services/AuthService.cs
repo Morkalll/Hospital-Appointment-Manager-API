@@ -14,7 +14,10 @@ namespace TPI_2026.Application.Services;
 
 
 public class AuthService(
-    IUnitOfWork unitOfWork,
+    IRepository<Doctor> doctorRepo,
+    IRepository<Receptionist> receptionistRepo,
+    IRepository<Administrator> adminRepo,
+    IRepository<Patient> patientRepo,
     IPasswordHasher<Doctor> doctorHasher,
     IPasswordHasher<Receptionist> receptionistHasher,
     IPasswordHasher<Administrator> adminHasher,
@@ -22,28 +25,28 @@ public class AuthService(
 {
     public async Task<AuthResponse> LoginAsync(string email, string password, CancellationToken cancellationToken = default)
     {
-        User? user = await unitOfWork.Doctors.FirstOrDefaultAsync(doctor => doctor.Email == email, cancellationToken)
-            ?? (User?)await unitOfWork.Receptionists.FirstOrDefaultAsync(receptionist => receptionist.Email == email, cancellationToken)
-            ?? (User?)await unitOfWork.Administrators.FirstOrDefaultAsync(admin => admin.Email == email, cancellationToken);
+        User? user = await doctorRepo.FirstOrDefaultAsync(doctor => doctor.Email == email, cancellationToken)
+            ?? (User?)await receptionistRepo.FirstOrDefaultAsync(receptionist => receptionist.Email == email, cancellationToken)
+            ?? (User?)await adminRepo.FirstOrDefaultAsync(admin => admin.Email == email, cancellationToken);
 
         if (user is null)
         {
-            var isPatient = await unitOfWork.Patients.AnyAsync(patient => patient.Email == email, cancellationToken);
+            var isPatient = await patientRepo.AnyAsync(patient => patient.Email == email, cancellationToken);
             if (isPatient) throw new ForbiddenException("Patients cannot log in to the system.");
             
             throw new NotFoundException("User", email);
         }
 
 
-        var doctor = await unitOfWork.Doctors.FirstOrDefaultAsync(d => d.Email == email, cancellationToken);
+        var doctor = await doctorRepo.FirstOrDefaultAsync(d => d.Email == email, cancellationToken);
         if (doctor is not null)
             return AuthenticateAndBuildResponse(doctor, doctor.Password, password, doctorHasher);
 
-        var receptionist = await unitOfWork.Receptionists.FirstOrDefaultAsync(r => r.Email == email, cancellationToken);
+        var receptionist = await receptionistRepo.FirstOrDefaultAsync(r => r.Email == email, cancellationToken);
         if (receptionist is not null)
             return AuthenticateAndBuildResponse(receptionist, receptionist.Password, password, receptionistHasher);
 
-        var admin = await unitOfWork.Administrators.FirstOrDefaultAsync(a => a.Email == email, cancellationToken);
+        var admin = await adminRepo.FirstOrDefaultAsync(a => a.Email == email, cancellationToken);
         if (admin is not null)
             return AuthenticateAndBuildResponse(admin, admin.Password, password, adminHasher);
 

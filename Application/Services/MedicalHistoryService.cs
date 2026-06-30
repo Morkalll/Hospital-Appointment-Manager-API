@@ -7,7 +7,9 @@ using TPI_2026.Domain.Enums;
 
 namespace TPI_2026.Application.Services;
 
-public class MedicalHistoryService(IUnitOfWork unitOfWork) : IMedicalHistoryService
+public class MedicalHistoryService(
+    IMedicalHistoryRepository medicalHistoryRepo,
+    IAppointmentRepository appointmentRepo) : IMedicalHistoryService
 {
     public async Task<Guid> CreateMedicalHistoryAsync(
         Guid appointmentId,
@@ -21,7 +23,7 @@ public class MedicalHistoryService(IUnitOfWork unitOfWork) : IMedicalHistoryServ
         if (diagnostic.Length > 2000)
             throw new ValidationException("Diagnostic cannot exceed 2000 characters.");
 
-        var appointment = await unitOfWork.Appointments.GetWithMedicalHistoryAsync(appointmentId, cancellationToken)
+        var appointment = await appointmentRepo.GetWithMedicalHistoryAsync(appointmentId, cancellationToken)
             ?? throw new NotFoundException(nameof(Appointment), appointmentId);
 
         if (appointment.State != AppointmentState.Completed)
@@ -41,16 +43,16 @@ public class MedicalHistoryService(IUnitOfWork unitOfWork) : IMedicalHistoryServ
 
         appointment.MedicalHistory = newMedicalHistory;
 
-        unitOfWork.MedicalHistories.Add(newMedicalHistory);
-
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await medicalHistoryRepo.AddAsync(newMedicalHistory, cancellationToken);
+        // Note: appointment navigation property modification is saved by the repo Add if tracked, or we can explicit update appointment.
+        // EF Core will save the new medical history and link it since we set the AppointmentId.
 
         return newMedicalHistory.Id;
     }
 
     public async Task<List<MedicalHistoryDto>> GetPatientMedicalHistoriesAsync(Guid patientId, CancellationToken cancellationToken = default)
     {
-        var medicalHistories = await unitOfWork.MedicalHistories.GetByPatientIdWithDetailsAsync(patientId, cancellationToken);
+        var medicalHistories = await medicalHistoryRepo.GetByPatientIdWithDetailsAsync(patientId, cancellationToken);
 
         return medicalHistories
         .Select(medicalHistory => new MedicalHistoryDto(

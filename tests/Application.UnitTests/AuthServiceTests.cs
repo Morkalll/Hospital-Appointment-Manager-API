@@ -13,7 +13,7 @@ namespace Application.UnitTests;
 [TestFixture]
 public class AuthServiceTests
 {
-    private Mock<IUnitOfWork> _unitOfWorkMock;
+    // Removed _unitOfWorkMock
     private Mock<IPasswordHasher<Doctor>> _doctorHasherMock;
     private Mock<IPasswordHasher<Receptionist>> _receptionistHasherMock;
     private Mock<IPasswordHasher<Administrator>> _adminHasherMock;
@@ -29,7 +29,7 @@ public class AuthServiceTests
     [SetUp]
     public void Setup()
     {
-        _unitOfWorkMock = new Mock<IUnitOfWork>();
+        // Removed _unitOfWorkMock init
         _doctorHasherMock = new Mock<IPasswordHasher<Doctor>>();
         _receptionistHasherMock = new Mock<IPasswordHasher<Receptionist>>();
         _adminHasherMock = new Mock<IPasswordHasher<Administrator>>();
@@ -40,17 +40,17 @@ public class AuthServiceTests
         _adminRepoMock = new Mock<IRepository<Administrator>>();
         _patientRepoMock = new Mock<IRepository<Patient>>();
 
-        _unitOfWorkMock.Setup(u => u.Doctors).Returns(_doctorRepoMock.Object);
-        _unitOfWorkMock.Setup(u => u.Receptionists).Returns(_receptionistRepoMock.Object);
-        _unitOfWorkMock.Setup(u => u.Administrators).Returns(_adminRepoMock.Object);
-        _unitOfWorkMock.Setup(u => u.Patients).Returns(_patientRepoMock.Object);
+        // Removed _unitOfWorkMock setup
 
         _configMock.Setup(c => c["Jwt:Key"]).Returns("ThisIsASecretKeyForTestingPurposesOnly");
         _configMock.Setup(c => c["Jwt:Issuer"]).Returns("TestIssuer");
         _configMock.Setup(c => c["Jwt:Audience"]).Returns("TestAudience");
 
         _authService = new AuthService(
-            _unitOfWorkMock.Object,
+            _doctorRepoMock.Object,
+            _receptionistRepoMock.Object,
+            _adminRepoMock.Object,
+            _patientRepoMock.Object,
             _doctorHasherMock.Object,
             _receptionistHasherMock.Object,
             _adminHasherMock.Object,
