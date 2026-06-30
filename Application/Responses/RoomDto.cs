@@ -6,6 +6,5 @@ public record RoomDto(
     Guid Id,
     string Number,
     int Floor,
-    Specialty Specialty,
-    Guid? DoctorId
+    Specialty Specialty
 );

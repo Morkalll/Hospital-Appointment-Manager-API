@@ -32,11 +32,17 @@ public class AppointmentService(IUnitOfWork unitOfWork) : IAppointmentService
         if (doctor.Specialty != room.Specialty)
             throw new ValidationException("The doctor's specialty does not match with the room's specialty.");
 
-        // Validación de si hay solapamiento de horarios con turnos ya existentes.
+        // Validación de si hay solapamiento de horarios con turnos ya existentes para el doctor.
         var overlaps = await unitOfWork.Appointments.HasOverlapAsync(doctorId, dateTime, cancellationToken);
 
         if (overlaps)
             throw new ValidationException("The doctor already has an appointment at that time.");
+
+        // Validación de si hay solapamiento de horarios con turnos ya existentes para la sala.
+        var roomOverlaps = await unitOfWork.Appointments.HasRoomOverlapAsync(roomId, dateTime, cancellationToken);
+
+        if (roomOverlaps)
+            throw new ValidationException("The room is already booked at that time.");
 
         // Se asignan las claves foráneas
         var appointment = Appointment.Create(
@@ -86,6 +92,22 @@ public class AppointmentService(IUnitOfWork unitOfWork) : IAppointmentService
     public async Task<List<AppointmentDto>> GetByPatientAsync(Guid patientId, CancellationToken cancellationToken = default)
     {
         var appointments = await unitOfWork.Appointments.GetByPatientIdAsync(patientId, cancellationToken);
+
+        return appointments
+        .Select(appointment => new AppointmentDto(
+            appointment.Id,
+            appointment.DoctorId,
+            appointment.Doctor!.Name,
+            appointment.RoomId,
+            appointment.Room!.Number,
+            appointment.DateTime,
+            appointment.State.ToString()))
+        .ToList();
+    }
+
+    public async Task<List<AppointmentDto>> GetByDoctorAsync(Guid doctorId, CancellationToken cancellationToken = default)
+    {
+        var appointments = await unitOfWork.Appointments.GetByDoctorIdAsync(doctorId, cancellationToken);
 
         return appointments
         .Select(appointment => new AppointmentDto(

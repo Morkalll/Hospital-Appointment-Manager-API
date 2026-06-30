@@ -9,6 +9,7 @@ using TPI_2026.Application.Abstractions.Interfaces.Services;
 using TPI_2026.Application.Exceptions;
 using TPI_2026.Domain.Entities;
 using TPI_2026.Application.Responses;
+using System.Text.RegularExpressions;
 
 namespace TPI_2026.Application.Services;
 
@@ -22,6 +23,12 @@ public class AuthService(
 {
     public async Task<AuthResponse> LoginAsync(string email, string password, CancellationToken cancellationToken = default)
     {
+        if (string.IsNullOrWhiteSpace(email)) throw new ValidationException("Email is required.");
+
+        if (!Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$")) throw new ValidationException("Invalid email format.");
+        
+        if (string.IsNullOrWhiteSpace(password)) throw new ValidationException("Password is required.");
+
         // Busca el usuario en todas las tablas. 
         User? user = await unitOfWork.Patients.FirstOrDefaultAsync(patient => patient.Email == email, cancellationToken)
             ?? (User?)await unitOfWork.Doctors.FirstOrDefaultAsync(doctor => doctor.Email == email, cancellationToken)

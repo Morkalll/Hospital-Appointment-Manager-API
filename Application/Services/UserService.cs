@@ -6,6 +6,7 @@ using TPI_2026.Domain.Entities;
 using TPI_2026.Domain.Enums;
 using TPI_2026.Application.Responses;
 using TPI_2026.Application.Abstractions.Interfaces.Repositories;
+using System.Text.RegularExpressions;
 
 namespace TPI_2026.Application.Services;
 
@@ -77,8 +78,20 @@ public class UserService(
         CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(name)) throw new ValidationException("Name is required.");
+
         if (string.IsNullOrWhiteSpace(email)) throw new ValidationException("Email is required.");
+
+        if (!Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$")) throw new ValidationException("Invalid email format.");
+
         if (string.IsNullOrWhiteSpace(dni)) throw new ValidationException("DNI is required.");
+
+        if (!Regex.IsMatch(dni, @"^\d{7,8}$")) throw new ValidationException("DNI must be 7 or 8 digits.");
+
+        if (birthDate > DateOnly.FromDateTime(DateTime.UtcNow)) throw new ValidationException("Birth date cannot be in the future.");
+
+        if (string.IsNullOrWhiteSpace(phoneNumber)) throw new ValidationException("Phone number is required.");
+        
+        if (string.IsNullOrWhiteSpace(address)) throw new ValidationException("Address is required.");
 
         if (await unitOfWork.Patients.AnyAsync(patient => patient.Dni == dni, cancellationToken))
             throw new ValidationException("A patient with that DNI already exists.");
@@ -116,8 +129,15 @@ public class UserService(
         CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(name)) throw new ValidationException("Name is required.");
+
         if (string.IsNullOrWhiteSpace(email)) throw new ValidationException("Email is required.");
+
+        if (!Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$")) throw new ValidationException("Invalid email format.");
+
         if (string.IsNullOrWhiteSpace(password)) throw new ValidationException("Password is required.");
+
+        if (password.Length < 6) throw new ValidationException("Password must be at least 6 characters long.");
+        
         if (string.IsNullOrWhiteSpace(credential)) throw new ValidationException("Credential is required.");
 
         if (await unitOfWork.Patients.AnyAsync(patient => patient.Email == email, cancellationToken) ||
@@ -155,10 +175,19 @@ public class UserService(
         CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(name)) throw new ValidationException("Name is required.");
+
         if (string.IsNullOrWhiteSpace(email)) throw new ValidationException("Email is required.");
+
+        if (!Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$")) throw new ValidationException("Invalid email format.");
+
         if (string.IsNullOrWhiteSpace(password)) throw new ValidationException("Password is required.");
+
+        if (password.Length < 6) throw new ValidationException("Password must be at least 6 characters long.");
+
         if (string.IsNullOrWhiteSpace(employeeNumber)) throw new ValidationException("Employee number is required.");
+
         if (string.IsNullOrWhiteSpace(workingShift)) throw new ValidationException("Working shift is required.");
+
         if (string.IsNullOrWhiteSpace(area)) throw new ValidationException("Area is required.");
 
         if (await unitOfWork.Patients.AnyAsync(patient => patient.Email == email, cancellationToken) ||
@@ -195,8 +224,14 @@ public class UserService(
         CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(name)) throw new ValidationException("Name is required.");
+
         if (string.IsNullOrWhiteSpace(email)) throw new ValidationException("Email is required.");
+
+        if (!Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$")) throw new ValidationException("Invalid email format.");
+
         if (string.IsNullOrWhiteSpace(password)) throw new ValidationException("Password is required.");
+
+        if (password.Length < 6) throw new ValidationException("Password must be at least 6 characters long.");
 
         if (await unitOfWork.Patients.AnyAsync(patient => patient.Email == email, cancellationToken) ||
             await unitOfWork.Doctors.AnyAsync(doctor => doctor.Email == email, cancellationToken) ||
@@ -249,6 +284,12 @@ public class UserService(
         var admin = await unitOfWork.Administrators.GetByIdAsync(userId, cancellationToken);
         if (admin is not null)
         {
+            var allAdmins = await unitOfWork.Administrators.GetAllAsync(cancellationToken);
+            if (allAdmins.Count <= 1)
+            {
+                throw new ValidationException("Cannot delete the last remaining administrator.");
+            }
+
             unitOfWork.Administrators.Remove(admin);
             await unitOfWork.SaveChangesAsync(cancellationToken);
             return;
