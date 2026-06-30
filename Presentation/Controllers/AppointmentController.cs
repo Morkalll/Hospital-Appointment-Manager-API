@@ -64,5 +64,17 @@ namespace TPI_2026.Presentation.Controllers
             var appointments = await _appointmentService.GetByPatientAsync(patientId, cancellationToken);
             return Ok(appointments);
         }
+
+        [HttpGet("doctor-appointments/{doctorId}")]
+        [Authorize]
+        public async Task<IActionResult> GetDoctorAppointments(
+            [FromRoute]
+            Guid doctorId,
+            CancellationToken cancellationToken = default
+        )
+        {
+            var appointments = await _appointmentService.GetByDoctorAsync(doctorId, cancellationToken);
+            return Ok(appointments);
+        }
     }
 }

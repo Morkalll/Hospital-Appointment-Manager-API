@@ -38,6 +38,12 @@ public interface IUserService
         string area,
         CancellationToken cancellationToken = default);
 
+    Task<Guid> RegisterAdminAsync(
+        string name,
+        string email,
+        string password,
+        CancellationToken cancellationToken = default);
+
     Task DeleteAsync(
         Guid userId,
         CancellationToken cancellationToken = default);

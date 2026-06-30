@@ -9,6 +9,7 @@ using TPI_2026.Application.Abstractions.Interfaces.Services;
 using TPI_2026.Application.Exceptions;
 using TPI_2026.Domain.Entities;
 using TPI_2026.Application.Responses;
+using System.Text.RegularExpressions;
 
 namespace TPI_2026.Application.Services;
 

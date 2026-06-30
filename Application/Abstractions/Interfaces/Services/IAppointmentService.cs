@@ -24,6 +24,10 @@ public interface IAppointmentService
     Task<List<AppointmentDto>> GetByPatientAsync(
         Guid patientId,
         CancellationToken cancellationToken = default);
+
+    Task<List<AppointmentDto>> GetByDoctorAsync(
+        Guid doctorId,
+        CancellationToken cancellationToken = default);
 }
 
 

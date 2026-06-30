@@ -74,6 +74,17 @@ namespace TPI_2026.Presentation.Controllers
             return Ok(new { Id = receptionistId });
         }
 
+        [HttpPost("create-admin")]
+        [Authorize(Policy = "AdministratorOnly")]
+        public async Task<IActionResult> CreateAdmin(
+            [FromBody] CreateAdminReq request,
+            CancellationToken cancellationToken = default
+        )
+        {
+            var adminId = await _userService.RegisterAdminAsync(request.Name, request.Email, request.Password, cancellationToken);
+            return Ok(new { Id = adminId });
+        }
+
         [HttpDelete("{id}")]
         [Authorize(Policy = "AdministratorOnly")]
         public async Task<IActionResult> DeleteUser(

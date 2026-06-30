@@ -23,8 +23,7 @@ public class RoomService : IRoomService
             r.Id,
             r.Number,
             r.Floor,
-            r.Specialty,
-            r.DoctorId
+            r.Specialty
         )).ToList();
     }
 }

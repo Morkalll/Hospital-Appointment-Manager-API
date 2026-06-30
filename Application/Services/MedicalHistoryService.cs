@@ -16,6 +16,8 @@ public class MedicalHistoryService(
         string diagnostic,
         CancellationToken cancellationToken = default)
     {
+        if (appointmentId == Guid.Empty)
+            throw new ValidationException("AppointmentId is required.");
 
         if (string.IsNullOrWhiteSpace(diagnostic))
             throw new ValidationException("Diagnostic is required.");

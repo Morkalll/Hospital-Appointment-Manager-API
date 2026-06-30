@@ -31,13 +31,13 @@ public class AppointmentService(
             throw new ValidationException("Appointments must have 0 seconds and milliseconds.");
 
         var patient = await patientRepo.GetByIdAsync(patientId, cancellationToken)
-            ?? throw new NotFoundException(nameof(Patient), patientId);
+            ?? throw new NotFoundException("Patient not found.", patientId);
 
         var room = await roomRepo.GetByIdAsync(roomId, cancellationToken)
-            ?? throw new NotFoundException(nameof(Room), roomId);
+            ?? throw new NotFoundException("Room not found.",   roomId);
 
         var doctor = await doctorRepo.GetByIdAsync(doctorId, cancellationToken)
-            ?? throw new NotFoundException(nameof(Doctor), doctorId);
+            ?? throw new NotFoundException("Doctor not found.", doctorId);
 
         if (!doctor.IsAvailable)
             throw new ValidationException("The doctor is not available.");
@@ -96,6 +96,22 @@ public class AppointmentService(
     public async Task<List<AppointmentDto>> GetByPatientAsync(Guid patientId, CancellationToken cancellationToken = default)
     {
         var appointments = await appointmentRepo.GetByPatientIdAsync(patientId, cancellationToken);
+
+        return appointments
+        .Select(appointment => new AppointmentDto(
+            appointment.Id,
+            appointment.DoctorId,
+            appointment.Doctor!.Name,
+            appointment.RoomId,
+            appointment.Room!.Number,
+            appointment.DateTime,
+            appointment.State.ToString()))
+        .ToList();
+    }
+
+    public async Task<List<AppointmentDto>> GetByDoctorAsync(Guid doctorId, CancellationToken cancellationToken = default)
+    {
+        var appointments = await appointmentRepo.GetByDoctorIdAsync(doctorId, cancellationToken);
 
         return appointments
         .Select(appointment => new AppointmentDto(
