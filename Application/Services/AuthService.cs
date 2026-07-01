@@ -35,7 +35,7 @@ public class AuthService(
             var isPatient = await patientRepo.AnyAsync(patient => patient.Email == email, cancellationToken);
             if (isPatient) throw new ForbiddenException("Patients cannot log in to the system.");
             
-            throw new NotFoundException("User", email);
+            throw new ForbiddenException("Invalid credentials.");
         }
 
 
@@ -51,7 +51,7 @@ public class AuthService(
         if (admin is not null)
             return AuthenticateAndBuildResponse(admin, admin.Password, password, adminHasher);
 
-        throw new NotFoundException("User", email);
+        throw new ForbiddenException("Invalid credentials.");
     }
 
     private AuthResponse AuthenticateAndBuildResponse<T>(T user, string hashedPassword, string plainPassword, IPasswordHasher<T> hasher)

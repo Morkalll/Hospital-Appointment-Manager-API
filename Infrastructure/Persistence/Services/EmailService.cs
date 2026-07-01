@@ -33,10 +33,6 @@ public class EmailService : IEmailService
 
         var response = await client.PostAsJsonAsync("emails", emailPayload, cancellationToken);
 
-        if (!response.IsSuccessStatusCode)
-        {
-            var errorResponse = await response.Content.ReadAsStringAsync(cancellationToken);
-            throw new Exception($"Fallo al enviar el correo: {errorResponse}");
-        }
+        
     }
 }

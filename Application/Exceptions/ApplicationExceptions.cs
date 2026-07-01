@@ -1,7 +1,7 @@
 namespace TPI_2026.Application.Exceptions;
 
-public class NotFoundException(string name, object key)
-    : Exception($"'{name}' ({key}) was not found.");
+public class NotFoundException(string name)
+    : Exception($"'{name}' was not found.");
 
 public class ForbiddenException(string message = "Access denied.")
     : Exception(message);
