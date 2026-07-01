@@ -54,21 +54,21 @@ public class UserService(
     {
         var patient = await patientRepo.FirstOrDefaultAsync(patient => patient.Id == userId, cancellationToken);
         if (patient is not null)
-            return new UserDto(patient.Id, patient.Name, patient.Email, patient.Role.ToString());
+            return new PatientDto(patient.Id, patient.Name, patient.Email, patient.Role.ToString(), patient.Dni, patient.BirthDate, patient.PhoneNumber, patient.Address);
 
         var doctor = await doctorRepo.FirstOrDefaultAsync(doctor => doctor.Id == userId, cancellationToken);
         if (doctor is not null)
-            return new UserDto(doctor.Id, doctor.Name, doctor.Email, doctor.Role.ToString());
+            return new DoctorDto(doctor.Id, doctor.Name, doctor.Email, doctor.Role.ToString(), doctor.Credential, doctor.Specialty, doctor.IsAvailable);
 
         var receptionist = await receptionistRepo.FirstOrDefaultAsync(receptionist => receptionist.Id == userId, cancellationToken);
         if (receptionist is not null)
-            return new UserDto(receptionist.Id, receptionist.Name, receptionist.Email, receptionist.Role.ToString());
+            return new ReceptionistDto(receptionist.Id, receptionist.Name, receptionist.Email, receptionist.Role.ToString(), receptionist.EmployeeNumber, receptionist.WorkingShift, receptionist.Area);
 
         var admin = await adminRepo.FirstOrDefaultAsync(admin => admin.Id == userId, cancellationToken);
         if (admin is not null)
             return new UserDto(admin.Id, admin.Name, admin.Email, admin.Role.ToString());
 
-        throw new NotFoundException("User", userId);
+        throw new NotFoundException("User");
     }
 
     public async Task<Guid> RegisterPatientAsync(
@@ -93,6 +93,8 @@ public class UserService(
         if (birthDate > DateOnly.FromDateTime(DateTime.UtcNow)) throw new ValidationException("Birth date cannot be in the future.");
 
         if (string.IsNullOrWhiteSpace(phoneNumber)) throw new ValidationException("Phone number is required.");
+
+        if (!Regex.IsMatch(phoneNumber, @"^\d+$")) throw new ValidationException("Phone number must contain only numbers.");  
         
         if (string.IsNullOrWhiteSpace(address)) throw new ValidationException("Address is required.");
 
@@ -152,6 +154,8 @@ public class UserService(
 
         if (await doctorRepo.AnyAsync(doctor => doctor.Credential == credential, cancellationToken))
             throw new ValidationException("A doctor with that credential already exists.");
+
+    
 
         var doctor = new Doctor
         {
@@ -296,6 +300,6 @@ public class UserService(
             return;
         }
 
-        throw new NotFoundException("User", userId);
+        throw new NotFoundException("User");
     }
 }

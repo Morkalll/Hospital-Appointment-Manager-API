@@ -9,7 +9,8 @@ namespace TPI_2026.Application.Services;
 
 public class MedicalHistoryService(
     IMedicalHistoryRepository medicalHistoryRepo,
-    IAppointmentRepository appointmentRepo) : IMedicalHistoryService
+    IAppointmentRepository appointmentRepo,
+    ICurrentUserService currentUserService) : IMedicalHistoryService
 {
     public async Task<Guid> CreateMedicalHistoryAsync(
         Guid appointmentId,
@@ -26,7 +27,11 @@ public class MedicalHistoryService(
             throw new ValidationException("Diagnostic cannot exceed 2000 characters.");
 
         var appointment = await appointmentRepo.GetWithMedicalHistoryAsync(appointmentId, cancellationToken)
-            ?? throw new NotFoundException(nameof(Appointment), appointmentId);
+            ?? throw new NotFoundException("Appointment");
+
+        var currentUserId = currentUserService.UserId;
+        if (currentUserId == null || appointment.DoctorId != currentUserId)
+            throw new ForbiddenException("Only the doctor related to the appointment can add a medical history.");
 
         if (appointment.State != AppointmentState.Completed)
             throw new ValidationException("Medical history can only be added to completed appointments.");
@@ -46,8 +51,6 @@ public class MedicalHistoryService(
         appointment.MedicalHistory = newMedicalHistory;
 
         await medicalHistoryRepo.AddAsync(newMedicalHistory, cancellationToken);
-        // Note: appointment navigation property modification is saved by the repo Add if tracked, or we can explicit update appointment.
-        // EF Core will save the new medical history and link it since we set the AppointmentId.
 
         return newMedicalHistory.Id;
     }

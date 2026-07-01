@@ -31,13 +31,13 @@ public class AppointmentService(
             throw new ValidationException("Appointments must have 0 seconds and milliseconds.");
 
         var patient = await patientRepo.GetByIdAsync(patientId, cancellationToken)
-            ?? throw new NotFoundException("Patient not found.", patientId);
+            ?? throw new NotFoundException("Patient");
 
         var room = await roomRepo.GetByIdAsync(roomId, cancellationToken)
-            ?? throw new NotFoundException("Room not found.",   roomId);
+            ?? throw new NotFoundException("Room");
 
         var doctor = await doctorRepo.GetByIdAsync(doctorId, cancellationToken)
-            ?? throw new NotFoundException("Doctor not found.", doctorId);
+            ?? throw new NotFoundException("Doctor");
 
         if (!doctor.IsAvailable)
             throw new ValidationException("The doctor is not available.");
@@ -70,7 +70,7 @@ public class AppointmentService(
     public async Task CancelAsync(Guid appointmentId, CancellationToken cancellationToken = default)
     {
         var appointment = await appointmentRepo.GetByIdAsync(appointmentId, cancellationToken)
-            ?? throw new NotFoundException(nameof(Appointment), appointmentId);
+            ?? throw new NotFoundException("Appointment");
 
         if (!appointment.IsCancelable())
             throw new NotCancellableAppointmentException(appointmentId);
@@ -83,7 +83,7 @@ public class AppointmentService(
     public async Task CompletionAsync(Guid appointmentId, CancellationToken cancellationToken = default)
     {
         var appointment = await appointmentRepo.GetByIdAsync(appointmentId, cancellationToken)
-        ?? throw new NotFoundException(nameof(Appointment), appointmentId);
+        ?? throw new NotFoundException("Appointment");
 
         if (!appointment.IsCompleteable())
             throw new NotCompleteableAppointmentException(appointmentId);
@@ -116,8 +116,8 @@ public class AppointmentService(
         return appointments
         .Select(appointment => new AppointmentDto(
             appointment.Id,
-            appointment.DoctorId,
-            appointment.Doctor!.Name,
+            appointment.PatientId,
+            appointment.Patient!.Name,
             appointment.RoomId,
             appointment.Room!.Number,
             appointment.DateTime,
