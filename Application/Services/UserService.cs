@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using TPI_2026.Application.Abstractions.Interfaces.Services;
 using TPI_2026.Application.Exceptions;
 using TPI_2026.Domain.Entities;
@@ -94,8 +93,8 @@ public class UserService(
 
         if (string.IsNullOrWhiteSpace(phoneNumber)) throw new ValidationException("Phone number is required.");
 
-        if (!Regex.IsMatch(phoneNumber, @"^\d+$")) throw new ValidationException("Phone number must contain only numbers.");  
-        
+        if (!Regex.IsMatch(phoneNumber, @"^\d+$")) throw new ValidationException("Phone number must contain only numbers.");
+
         if (string.IsNullOrWhiteSpace(address)) throw new ValidationException("Address is required.");
 
         if (await patientRepo.AnyAsync(patient => patient.Dni == dni, cancellationToken))
@@ -141,7 +140,7 @@ public class UserService(
         if (string.IsNullOrWhiteSpace(password)) throw new ValidationException("Password is required.");
 
         if (password.Length < 6) throw new ValidationException("Password must be at least 6 characters long.");
-        
+
         if (string.IsNullOrWhiteSpace(credential)) throw new ValidationException("Credential is required.");
 
         if (await patientRepo.AnyAsync(patient => patient.Email == email, cancellationToken) ||
@@ -155,7 +154,7 @@ public class UserService(
         if (await doctorRepo.AnyAsync(doctor => doctor.Credential == credential, cancellationToken))
             throw new ValidationException("A doctor with that credential already exists.");
 
-    
+
 
         var doctor = new Doctor
         {
@@ -237,7 +236,7 @@ public class UserService(
 
         if (password.Length < 6) throw new ValidationException("Password must be at least 6 characters long.");
 
-        
+
         if (await patientRepo.AnyAsync(patient => patient.Email == email, cancellationToken) ||
             await doctorRepo.AnyAsync(doctor => doctor.Email == email, cancellationToken) ||
             await receptionistRepo.AnyAsync(receptionist => receptionist.Email == email, cancellationToken) ||

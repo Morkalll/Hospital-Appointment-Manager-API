@@ -1,19 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using TPI_2026.Domain.Entities;
 using TPI_2026.Domain.Common;
-using TPI_2026.Application.Abstractions.Interfaces.Events;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace TPI_2026.Infrastructure.Persistence;
 
 public class ApplicationDbContext : DbContext
 {
-    private readonly IServiceProvider _serviceProvider;
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, IServiceProvider serviceProvider)
-    : base(options)
-    {
-        _serviceProvider = serviceProvider;
-    }
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+    : base(options) { }
 
     public DbSet<Patient> Patients { get; set; }
     public DbSet<Doctor> Doctors { get; set; }
@@ -28,7 +22,6 @@ public class ApplicationDbContext : DbContext
         base.OnModelCreating(modelBuilder);
 
         modelBuilder.Ignore<BaseEvent>();
-
 
         modelBuilder.Entity<User>()
             .HasDiscriminator<string>("UserType")
@@ -116,8 +109,6 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<MedicalHistory>().HasQueryFilter(e => !e.IsDeleted);
     }
 
-
-
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         var now = DateTime.UtcNow;
@@ -132,41 +123,7 @@ public class ApplicationDbContext : DbContext
                 entry.Entity.UpdatedAt = now;
         }
 
-        var entitiesWithEvents = ChangeTracker.Entries<BaseEntity>()
-        .Where(e => e.Entity.DomainEvents.Any())
-        .Select(e => e.Entity)
-        .ToList();
-
-        var domainEvents = entitiesWithEvents.SelectMany(e => e.DomainEvents).ToList();
-
-        entitiesWithEvents.ForEach(e => e.ClearDomainEvents());
-
-        var result = await base.SaveChangesAsync(cancellationToken);
-
-        foreach (var domainEvent in domainEvents)
-        {
-            await DispatcherEventAsync(domainEvent, cancellationToken);
-        }
-
-        return result;
+        return await base.SaveChangesAsync(cancellationToken);
     }
 
-
-    private async Task DispatcherEventAsync(BaseEvent domainEvent, CancellationToken cancellationToken)
-    {
-        var eventHandlerType = typeof(IEventHandler<>).MakeGenericType(domainEvent.GetType());
-
-        var eventHandlers = _serviceProvider.GetServices(eventHandlerType);
-
-        foreach (var eventHandler in eventHandlers)
-        {
-            if (eventHandler is null) continue;
-
-            var method = eventHandler.GetType().GetMethod("HandleAsync");
-            if (method is not null)
-            {
-                await (Task)method.Invoke(eventHandler, [domainEvent, cancellationToken])!;
-            }
-        }
-    }
 }

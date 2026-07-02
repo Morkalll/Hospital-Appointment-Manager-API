@@ -3,12 +3,8 @@ using TPI_2026.Domain.Entities;
 
 namespace TPI_2026.Domain.Events;
 
-public class AppointmentCreatedEvent : BaseEvent
+public class AppointmentCreatedEvent(Appointment appointment) : BaseEvent
 {
-    public Appointment Appointment { get; }
+    public Appointment Appointment { get; } = appointment;
 
-    public AppointmentCreatedEvent(Appointment appointment)
-    {
-        Appointment = appointment;
-    }
 }

@@ -9,7 +9,7 @@ namespace TPI_2026.Application;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddApplicationServices(this IServiceCollection services)
+    public static IServiceCollection AddApplication(this IServiceCollection services)
     {
         services.AddScoped<IAppointmentService, AppointmentService>();
         services.AddScoped<IUserService, UserService>();
@@ -18,6 +18,7 @@ public static class DependencyInjection
         services.AddScoped<IRoomService, RoomService>();
         services.AddTransient<IEventHandler<AppointmentCreatedEvent>, SendEmailOnAppointmentCreatedHandler>();
         services.AddTransient<IEventHandler<AppointmentCanceledEvent>, SendEmailOnAppointmentCanceledHandler>();
+        services.AddTransient<IEventHandler<AppointmentChangedEvent>, SendEmailOnAppointmentChangedHandler>();
         return services;
     }
 }

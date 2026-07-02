@@ -7,5 +7,5 @@ namespace TPI_2026.Domain.Events;
 public class AppointmentChangedEvent(Appointment appointment, AppointmentState previousState) : BaseEvent
 {
     public Appointment Appointment { get; } = appointment;
-    public AppointmentState AppointmentState { get; } = previousState;
+    public AppointmentState PreviousState { get; } = previousState;
 }
