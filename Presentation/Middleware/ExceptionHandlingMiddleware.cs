@@ -1,5 +1,8 @@
 using System.Net;
 using System.Text.Json;
+using System;
+using System.Threading.Tasks;
+using System.Linq;
 using TPI_2026.Application.Exceptions;
 using TPI_2026.Domain.Exceptions;
 
@@ -41,12 +44,25 @@ namespace TPI_2026.Presentation.Middleware
                     DomainException => (int)HttpStatusCode.BadRequest,
                     _ => (int)HttpStatusCode.InternalServerError
                 };
+                object response;
 
-                var response = new
+                if (exception is ValidationException validationException && validationException.Errors?.Any() == true)
                 {
-                    StatusCode = context.Response.StatusCode,
-                    Message = exception.Message
-                };
+                    response = new
+                    {
+                        StatusCode = context.Response.StatusCode,
+                        Message = exception.Message,
+                        Errors = validationException.Errors
+                    };
+                }
+                else
+                {
+                    response = new
+                    {
+                        StatusCode = context.Response.StatusCode,
+                        Message = exception.Message
+                    };
+                }
 
                 return context.Response.WriteAsync(JsonSerializer.Serialize(response));
             }

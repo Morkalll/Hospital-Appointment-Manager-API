@@ -17,14 +17,17 @@ public class MedicalHistoryService(
         string diagnostic,
         CancellationToken cancellationToken = default)
     {
+        var errors = new List<string>();
+
         if (appointmentId == Guid.Empty)
-            throw new ValidationException("AppointmentId is required.");
+            errors.Add("AppointmentId is required.");
 
         if (string.IsNullOrWhiteSpace(diagnostic))
-            throw new ValidationException("Diagnostic is required.");
+            errors.Add("Diagnostic is required.");
+        else if (diagnostic.Length > 2000)
+            errors.Add("Diagnostic cannot exceed 2000 characters.");
 
-        if (diagnostic.Length > 2000)
-            throw new ValidationException("Diagnostic cannot exceed 2000 characters.");
+        if (errors.Count > 0) throw new ValidationException(errors);
 
         var appointment = await appointmentRepo.GetWithMedicalHistoryAsync(appointmentId, cancellationToken)
             ?? throw new NotFoundException("Appointment");
@@ -34,10 +37,12 @@ public class MedicalHistoryService(
             throw new ForbiddenException("Only the doctor related to the appointment can add a medical history.");
 
         if (appointment.State != AppointmentState.Completed)
-            throw new ValidationException("Medical history can only be added to completed appointments.");
+            errors.Add("Medical history can only be added to completed appointments.");
 
         if (appointment.MedicalHistory is not null)
-            throw new ValidationException("A medical history already exists for this appointment.");
+            errors.Add("A medical history already exists for this appointment.");
+
+        if (errors.Count > 0) throw new ValidationException(errors);
 
         var newMedicalHistory = new MedicalHistory
         {

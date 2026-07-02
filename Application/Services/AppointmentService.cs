@@ -21,19 +21,27 @@ public class AppointmentService(
 {
     public async Task<Guid> CreateAsync(Guid patientId, Guid doctorId, Guid roomId, DateTime dateTime, CancellationToken cancellationToken = default)
     {
-        if (patientId == Guid.Empty) throw new ValidationException("PatientId is required.");
-        if (doctorId == Guid.Empty) throw new ValidationException("DoctorId is required.");
-        if (roomId == Guid.Empty) throw new ValidationException("RoomId is required.");
-        if (dateTime <= DateTime.UtcNow) throw new ValidationException("Appointment date must be in the future.");
+        var errors = new List<string>();
 
-        if (dateTime.Hour < 9 || dateTime.Hour >= 20 || (dateTime.Hour == 20 && dateTime.Minute > 0))
-            throw new ValidationException("Appointments can only be scheduled between 09:00 and 20:00.");
+        if (patientId == Guid.Empty) errors.Add("PatientId is required.");
+        if (doctorId == Guid.Empty) errors.Add("DoctorId is required.");
+        if (roomId == Guid.Empty) errors.Add("RoomId is required.");
+        
+        if (dateTime <= DateTime.UtcNow) 
+        {
+            errors.Add("Appointment date must be in the future.");
+        }
+        else
+        {
+            if (dateTime.Hour < 9 || dateTime.Hour >= 20 || (dateTime.Hour == 20 && dateTime.Minute > 0))
+                errors.Add("Appointments can only be scheduled between 09:00 and 20:00.");
+            if (dateTime.Minute != 0 && dateTime.Minute != 30)
+                errors.Add("Appointments must be scheduled precisely on the hour or half-hour (e.g., 09:00 or 09:30).");
+            if (dateTime.Second != 0 || dateTime.Millisecond != 0)
+                errors.Add("Appointments must have 0 seconds and milliseconds.");
+        }
 
-        if (dateTime.Minute != 0 && dateTime.Minute != 30)
-            throw new ValidationException("Appointments must be scheduled precisely on the hour or half-hour (e.g., 09:00 or 09:30).");
-
-        if (dateTime.Second != 0)
-            throw new ValidationException("Appointments must have 0 seconds.");
+        if (errors.Count > 0) throw new ValidationException(errors);
 
         var patient = await patientRepo.GetByIdAsync(patientId, cancellationToken)
             ?? throw new NotFoundException("Patient");
@@ -45,16 +53,18 @@ public class AppointmentService(
             ?? throw new NotFoundException("Doctor");
 
         if (!doctor.IsAvailable)
-            throw new ValidationException("The doctor is not available.");
+            errors.Add("The doctor is not available.");
 
         if (doctor.Specialty != room.Specialty)
-            throw new ValidationException("The doctor's specialty does not match with the room's specialty.");
+            errors.Add("The doctor's specialty does not match with the room's specialty.");
 
         if (await appointmentRepo.HasDoctorOverlapAsync(doctorId, dateTime, cancellationToken))
-            throw new ValidationException("The doctor already has an appointment assigned at that time.");
+            errors.Add("The doctor already has an appointment assigned at that time.");
 
         if (await appointmentRepo.HasRoomOverlapAsync(roomId, dateTime, cancellationToken))
-            throw new ValidationException("The room is already booked for another appointment at that time.");
+            errors.Add("The room is already booked for another appointment at that time.");
+
+        if (errors.Count > 0) throw new ValidationException(errors);
 
         var appointment = Appointment.Create(
             patientId,

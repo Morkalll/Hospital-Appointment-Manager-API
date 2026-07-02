@@ -79,35 +79,37 @@ public class UserService(
         string address,
         CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(name)) throw new ValidationException("Name is required.");
+        var errors = new List<string>();
 
-        if (string.IsNullOrWhiteSpace(email)) throw new ValidationException("Email is required.");
+        if (string.IsNullOrWhiteSpace(name)) errors.Add("Name is required.");
+        
+        if (string.IsNullOrWhiteSpace(email)) errors.Add("Email is required.");
+        else if (!Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$")) errors.Add("Invalid email format.");
 
-        if (!Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$")) throw new ValidationException("Invalid email format.");
+        if (string.IsNullOrWhiteSpace(dni)) errors.Add("DNI is required.");
+        else if (!Regex.IsMatch(dni, @"^\d{7,8}$")) errors.Add("DNI must be 7 or 8 digits.");
 
-        if (string.IsNullOrWhiteSpace(dni)) throw new ValidationException("DNI is required.");
+        if (birthDate > DateOnly.FromDateTime(DateTime.UtcNow)) errors.Add("Birth date cannot be in the future.");
 
-        if (!Regex.IsMatch(dni, @"^\d{7,8}$")) throw new ValidationException("DNI must be 7 or 8 digits.");
+        if (string.IsNullOrWhiteSpace(phoneNumber)) errors.Add("Phone number is required.");
+        else if (!Regex.IsMatch(phoneNumber, @"^\d+$")) errors.Add("Phone number must contain only numbers.");  
+        
+        if (string.IsNullOrWhiteSpace(address)) errors.Add("Address is required.");
 
-        if (birthDate > DateOnly.FromDateTime(DateTime.UtcNow)) throw new ValidationException("Birth date cannot be in the future.");
-
-        if (string.IsNullOrWhiteSpace(phoneNumber)) throw new ValidationException("Phone number is required.");
-
-        if (!Regex.IsMatch(phoneNumber, @"^\d+$")) throw new ValidationException("Phone number must contain only numbers.");
-
-        if (string.IsNullOrWhiteSpace(address)) throw new ValidationException("Address is required.");
+        if (errors.Count > 0) throw new ValidationException(errors);
 
         if (await patientRepo.AnyAsync(patient => patient.Dni == dni, cancellationToken))
-            throw new ValidationException("A patient with that DNI already exists.");
-
+            errors.Add("A patient with that DNI already exists.");
 
         if (await patientRepo.AnyAsync(patient => patient.Email == email, cancellationToken) ||
             await doctorRepo.AnyAsync(doctor => doctor.Email == email, cancellationToken) ||
             await receptionistRepo.AnyAsync(receptionist => receptionist.Email == email, cancellationToken) ||
             await adminRepo.AnyAsync(admin => admin.Email == email, cancellationToken))
         {
-            throw new ValidationException("A user with that email already exists.");
+            errors.Add("A user with that email already exists.");
         }
+
+        if (errors.Count > 0) throw new ValidationException(errors);
 
         var patient = new Patient
         {
@@ -131,28 +133,32 @@ public class UserService(
         Specialty specialty,
         CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(name)) throw new ValidationException("Name is required.");
+        var errors = new List<string>();
 
-        if (string.IsNullOrWhiteSpace(email)) throw new ValidationException("Email is required.");
+        if (string.IsNullOrWhiteSpace(name)) errors.Add("Name is required.");
+        
+        if (string.IsNullOrWhiteSpace(email)) errors.Add("Email is required.");
+        else if (!Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$")) errors.Add("Invalid email format.");
 
-        if (!Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$")) throw new ValidationException("Invalid email format.");
+        if (string.IsNullOrWhiteSpace(password)) errors.Add("Password is required.");
+        else if (password.Length < 6) errors.Add("Password must be at least 6 characters long.");
+        
+        if (string.IsNullOrWhiteSpace(credential)) errors.Add("Credential is required.");
 
-        if (string.IsNullOrWhiteSpace(password)) throw new ValidationException("Password is required.");
-
-        if (password.Length < 6) throw new ValidationException("Password must be at least 6 characters long.");
-
-        if (string.IsNullOrWhiteSpace(credential)) throw new ValidationException("Credential is required.");
+        if (errors.Count > 0) throw new ValidationException(errors);
 
         if (await patientRepo.AnyAsync(patient => patient.Email == email, cancellationToken) ||
             await doctorRepo.AnyAsync(doctor => doctor.Email == email, cancellationToken) ||
             await receptionistRepo.AnyAsync(receptionist => receptionist.Email == email, cancellationToken) ||
             await adminRepo.AnyAsync(admin => admin.Email == email, cancellationToken))
         {
-            throw new ValidationException("A user with that email already exists.");
+            errors.Add("A user with that email already exists.");
         }
 
         if (await doctorRepo.AnyAsync(doctor => doctor.Credential == credential, cancellationToken))
-            throw new ValidationException("A doctor with that credential already exists.");
+            errors.Add("A doctor with that credential already exists.");
+
+        if (errors.Count > 0) throw new ValidationException(errors);
 
 
 
@@ -178,32 +184,36 @@ public class UserService(
         string area,
         CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(name)) throw new ValidationException("Name is required.");
+        var errors = new List<string>();
 
-        if (string.IsNullOrWhiteSpace(email)) throw new ValidationException("Email is required.");
+        if (string.IsNullOrWhiteSpace(name)) errors.Add("Name is required.");
 
-        if (!Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$")) throw new ValidationException("Invalid email format.");
+        if (string.IsNullOrWhiteSpace(email)) errors.Add("Email is required.");
+        else if (!Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$")) errors.Add("Invalid email format.");
 
-        if (string.IsNullOrWhiteSpace(password)) throw new ValidationException("Password is required.");
+        if (string.IsNullOrWhiteSpace(password)) errors.Add("Password is required.");
+        else if (password.Length < 6) errors.Add("Password must be at least 6 characters long.");
 
-        if (password.Length < 6) throw new ValidationException("Password must be at least 6 characters long.");
+        if (string.IsNullOrWhiteSpace(employeeNumber)) errors.Add("Employee number is required.");
 
-        if (string.IsNullOrWhiteSpace(employeeNumber)) throw new ValidationException("Employee number is required.");
+        if (string.IsNullOrWhiteSpace(workingShift)) errors.Add("Working shift is required.");
 
-        if (string.IsNullOrWhiteSpace(workingShift)) throw new ValidationException("Working shift is required.");
+        if (string.IsNullOrWhiteSpace(area)) errors.Add("Area is required.");
 
-        if (string.IsNullOrWhiteSpace(area)) throw new ValidationException("Area is required.");
+        if (errors.Count > 0) throw new ValidationException(errors);
 
         if (await patientRepo.AnyAsync(patient => patient.Email == email, cancellationToken) ||
             await doctorRepo.AnyAsync(doctor => doctor.Email == email, cancellationToken) ||
             await receptionistRepo.AnyAsync(receptionist => receptionist.Email == email, cancellationToken) ||
             await adminRepo.AnyAsync(admin => admin.Email == email, cancellationToken))
         {
-            throw new ValidationException("A user with that email already exists.");
+            errors.Add("A user with that email already exists.");
         }
 
         if (await receptionistRepo.AnyAsync(receptionist => receptionist.EmployeeNumber == employeeNumber, cancellationToken))
-            throw new ValidationException("A user with that employee number already exists.");
+            errors.Add("A user with that employee number already exists.");
+
+        if (errors.Count > 0) throw new ValidationException(errors);
 
         var receptionist = new Receptionist
         {
@@ -226,24 +236,27 @@ public class UserService(
         string password,
         CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(name)) throw new ValidationException("Name is required.");
+        var errors = new List<string>();
 
-        if (string.IsNullOrWhiteSpace(email)) throw new ValidationException("Email is required.");
+        if (string.IsNullOrWhiteSpace(name)) errors.Add("Name is required.");
 
-        if (!Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$")) throw new ValidationException("Invalid email format.");
+        if (string.IsNullOrWhiteSpace(email)) errors.Add("Email is required.");
+        else if (!Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$")) errors.Add("Invalid email format.");
 
-        if (string.IsNullOrWhiteSpace(password)) throw new ValidationException("Password is required.");
+        if (string.IsNullOrWhiteSpace(password)) errors.Add("Password is required.");
+        else if (password.Length < 6) errors.Add("Password must be at least 6 characters long.");
 
-        if (password.Length < 6) throw new ValidationException("Password must be at least 6 characters long.");
-
-
+        if (errors.Count > 0) throw new ValidationException(errors);
+        
         if (await patientRepo.AnyAsync(patient => patient.Email == email, cancellationToken) ||
             await doctorRepo.AnyAsync(doctor => doctor.Email == email, cancellationToken) ||
             await receptionistRepo.AnyAsync(receptionist => receptionist.Email == email, cancellationToken) ||
             await adminRepo.AnyAsync(admin => admin.Email == email, cancellationToken))
         {
-            throw new ValidationException("A user with that email already exists.");
+            errors.Add("A user with that email already exists.");
         }
+
+        if (errors.Count > 0) throw new ValidationException(errors);
 
 
         var administrator = new Administrator
@@ -291,7 +304,8 @@ public class UserService(
             var allAdmins = await adminRepo.GetAllAsync(cancellationToken);
             if (allAdmins.Count <= 1)
             {
-                throw new ValidationException("Cannot delete the last remaining administrator.");
+                var errors = new List<string> { "Cannot delete the last remaining administrator." };
+                throw new ValidationException(errors);
             }
 
             admin.IsDeleted = true;
