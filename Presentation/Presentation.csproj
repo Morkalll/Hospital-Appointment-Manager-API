@@ -3,8 +3,6 @@
   <PropertyGroup>
     <RootNamespace>TPI_2026.Presentation</RootNamespace>
     <AssemblyName>TPI_2026.Presentation</AssemblyName>
-    <OpenApiDocumentsDirectory>./wwwroot/openapi/</OpenApiDocumentsDirectory>
-    <OpenApiGenerateDocumentsOptions>--file-name v1</OpenApiGenerateDocumentsOptions>
   </PropertyGroup>
 
   <ItemGroup>

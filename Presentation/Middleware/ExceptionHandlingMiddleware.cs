@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Text.Json;
 using System;
@@ -35,7 +33,7 @@ namespace TPI_2026.Presentation.Middleware
         private static Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
             context.Response.ContentType = "application/json";
-            
+
             if (exception is NotFoundException or ForbiddenException or ValidationException or DomainException)
             {
                 context.Response.StatusCode = exception switch

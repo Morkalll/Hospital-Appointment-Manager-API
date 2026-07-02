@@ -1,19 +1,19 @@
 using TPI_2026.Application;
 using TPI_2026.Infrastructure;
 using TPI_2026.Infrastructure.Persistence;
-using TPI_2026.Presentation.Infrastructure;
+using TPI_2026.Presentation;
 using TPI_2026.Presentation.Middleware;
 using System.Text.Json.Serialization;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.AddServiceDefaults();
-builder.AddKeyVaultIfConfigured();
+builder.Services.AddRouting();
+builder.Services.AddEndpointsApiExplorer();
 
-builder.Services.AddApplicationServices();
+builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
-builder.Services.AddPresentationServices(builder.Configuration);
+builder.Services.AddPresentation(builder.Configuration);
 builder.Services.AddControllers()
     .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
@@ -50,15 +50,18 @@ app.UseCors(static builder =>
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseFileServer();
 
 app.MapOpenApi();
-app.MapScalarApiReference();
+app.MapScalarApiReference(options =>
+{
+    options.Authentication = new Scalar.AspNetCore.ScalarAuthenticationOptions
+    {
+        PreferredSecuritySchemes = new[] { "Bearer" }
+    };
+});
 
 app.MapControllers();
-app.MapDefaultEndpoints();
-app.MapEndpoints(typeof(Program).Assembly);
+app.MapGet("/health", () => Results.Ok("Healthy"));
 
-app.MapFallbackToFile("index.html");
 
 app.Run();

@@ -1,9 +1,7 @@
 using TPI_2026.Domain.Entities;
 using TPI_2026.Domain.Enums;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using BCrypt.Net;
 
 namespace TPI_2026.Infrastructure.Persistence;
 

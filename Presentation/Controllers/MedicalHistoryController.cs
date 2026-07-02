@@ -1,8 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TPI_2026.Domain.Enums;
 using TPI_2026.Application.Abstractions.Interfaces.Services;
-using TPI_2026.Application.Responses;
 using TPI_2026.Application.Requests;
 
 

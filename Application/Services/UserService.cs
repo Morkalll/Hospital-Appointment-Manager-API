@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using TPI_2026.Application.Abstractions.Interfaces.Services;
 using TPI_2026.Application.Exceptions;
 using TPI_2026.Domain.Entities;
@@ -161,7 +160,7 @@ public class UserService(
 
         if (errors.Count > 0) throw new ValidationException(errors);
 
-    
+
 
         var doctor = new Doctor
         {
