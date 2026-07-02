@@ -8,13 +8,9 @@ public class ForbiddenException(string message = "Access denied.")
 
 public class ValidationException : Exception
 {
-    public IDictionary<string, string[]> Errors { get; }
+    public IEnumerable<string> Errors { get; }
     
-    public ValidationException(string message) : base(message)
-    {
-        Errors = new Dictionary<string, string[]>();
-    }
-    public ValidationException(IDictionary<string, string[]> errors)
+    public ValidationException(IEnumerable<string> errors)
         : base("One or more validation errors ocurred.")
     {
         Errors = errors;
