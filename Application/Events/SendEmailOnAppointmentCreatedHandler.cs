@@ -17,18 +17,20 @@ public class SendEmailOnAppointmentCreatedHandler : IEventHandler<AppointmentCre
     {
         var appointment = domainEvent.Appointment;
         var patient = appointment.Patient;
+        var doctor = appointment.Doctor;
+        var room = appointment.Room;
 
-        var emailDestino = patient?.Email;
+        var messageDestinatory = patient?.Email;
 
-        if (patient == null || string.IsNullOrEmpty(emailDestino)) return;
+        if (patient == null || string.IsNullOrEmpty(messageDestinatory)) return;
 
         var subject = "Confirmación de Turno Médico";
         var body = $"Hola {patient.Name},\n\n" +
                  $"Tu turno ha sido registrado para el día {appointment.DateTime:dd/MM/yyyy HH:mm}.\n" +
-                 $"Médico: Dr/a. {appointment.Doctor?.Name}\n" +
-                 $"Sala N°: {appointment.Room?.Number}\n\n" +
+                 $"Médico: Dr/a. {doctor?.Name}\n" +
+                 $"Sala N°: {room?.Number}\n\n" +
                  $"Saludos,\nAdministración de la Clínica.";
 
-        await _emailService.SendEmailAsync(emailDestino, subject, body);
+        await _emailService.SendEmailAsync(messageDestinatory, subject, body);
     }
 }

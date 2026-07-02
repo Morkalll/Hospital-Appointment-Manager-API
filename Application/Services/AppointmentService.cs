@@ -1,3 +1,4 @@
+using TPI_2026.Application.Abstractions.Interfaces.Events;
 using TPI_2026.Application.Abstractions.Interfaces.Repositories;
 using TPI_2026.Application.Abstractions.Interfaces.Services;
 using TPI_2026.Application.Exceptions;
@@ -5,6 +6,7 @@ using TPI_2026.Application.Responses;
 using TPI_2026.Domain.Entities;
 using TPI_2026.Domain.Enums;
 using TPI_2026.Domain.Exceptions;
+using TPI_2026.Domain.Events;
 
 namespace TPI_2026.Application.Services;
 
@@ -12,7 +14,10 @@ public class AppointmentService(
     IAppointmentRepository appointmentRepo,
     IRepository<Patient> patientRepo,
     IRepository<Doctor> doctorRepo,
-    IRepository<Room> roomRepo) : IAppointmentService
+    IRepository<Room> roomRepo,
+    IEventHandler<AppointmentCreatedEvent> createdEventHandler,
+    IEventHandler<AppointmentCanceledEvent> canceledEventHandler,
+    IEventHandler<AppointmentChangedEvent> changedEventHandler) : IAppointmentService
 {
     public async Task<Guid> CreateAsync(Guid patientId, Guid doctorId, Guid roomId, DateTime dateTime, CancellationToken cancellationToken = default)
     {
@@ -27,8 +32,8 @@ public class AppointmentService(
         if (dateTime.Minute != 0 && dateTime.Minute != 30)
             throw new ValidationException("Appointments must be scheduled precisely on the hour or half-hour (e.g., 09:00 or 09:30).");
 
-        if (dateTime.Second != 0 || dateTime.Millisecond != 0)
-            throw new ValidationException("Appointments must have 0 seconds and milliseconds.");
+        if (dateTime.Second != 0)
+            throw new ValidationException("Appointments must have 0 seconds.");
 
         var patient = await patientRepo.GetByIdAsync(patientId, cancellationToken)
             ?? throw new NotFoundException("Patient");
@@ -57,12 +62,9 @@ public class AppointmentService(
             roomId,
             dateTime);
 
-        // Se asignan las propiedades de navegación (para hacer: 'Patient.[]' 'Doctor.[]' 'Room.[]') 
-        appointment.Patient = patient;
-        appointment.Doctor = doctor;
-        appointment.Room = room;
-
         await appointmentRepo.AddAsync(appointment, cancellationToken);
+        
+        await createdEventHandler.HandleAsync(new AppointmentCreatedEvent(appointment), cancellationToken);
 
         return appointment.Id;
     }
@@ -78,6 +80,8 @@ public class AppointmentService(
         appointment.ChangeState(AppointmentState.Canceled);
 
         await appointmentRepo.UpdateAsync(appointment, cancellationToken);
+        
+        await canceledEventHandler.HandleAsync(new AppointmentCanceledEvent(appointment), cancellationToken);
     }
 
     public async Task CompletionAsync(Guid appointmentId, CancellationToken cancellationToken = default)
@@ -88,9 +92,12 @@ public class AppointmentService(
         if (!appointment.IsCompleteable())
             throw new NotCompleteableAppointmentException(appointmentId);
 
+        var previousState = appointment.State;
         appointment.ChangeState(AppointmentState.Completed);
 
         await appointmentRepo.UpdateAsync(appointment, cancellationToken);
+        
+        await changedEventHandler.HandleAsync(new AppointmentChangedEvent(appointment, previousState), cancellationToken);
     }
 
     public async Task<List<AppointmentDto>> GetByPatientAsync(Guid patientId, CancellationToken cancellationToken = default)

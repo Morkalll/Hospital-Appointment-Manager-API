@@ -9,7 +9,6 @@ using TPI_2026.Application.Abstractions.Interfaces.Services;
 using TPI_2026.Application.Exceptions;
 using TPI_2026.Domain.Entities;
 using TPI_2026.Application.Responses;
-using System.Text.RegularExpressions;
 
 namespace TPI_2026.Application.Services;
 
@@ -34,21 +33,17 @@ public class AuthService(
         {
             var isPatient = await patientRepo.AnyAsync(patient => patient.Email == email, cancellationToken);
             if (isPatient) throw new ForbiddenException("Patients cannot log in to the system.");
-            
+
             throw new ForbiddenException("Invalid credentials.");
         }
 
-
-        var doctor = await doctorRepo.FirstOrDefaultAsync(d => d.Email == email, cancellationToken);
-        if (doctor is not null)
+        if (user is Doctor doctor)
             return AuthenticateAndBuildResponse(doctor, doctor.Password, password, doctorHasher);
 
-        var receptionist = await receptionistRepo.FirstOrDefaultAsync(r => r.Email == email, cancellationToken);
-        if (receptionist is not null)
+        if (user is Receptionist receptionist)
             return AuthenticateAndBuildResponse(receptionist, receptionist.Password, password, receptionistHasher);
 
-        var admin = await adminRepo.FirstOrDefaultAsync(a => a.Email == email, cancellationToken);
-        if (admin is not null)
+        if (user is Administrator admin)
             return AuthenticateAndBuildResponse(admin, admin.Password, password, adminHasher);
 
         throw new ForbiddenException("Invalid credentials.");
@@ -73,7 +68,8 @@ public class AuthService(
     private string GenerateToken(User user)
     {
         var jwtKey = configuration["Jwt:Key"];
-        if (string.IsNullOrEmpty(jwtKey)) jwtKey = "YourSuperSecretKeyThatIsAtLeast32CharsLong!!";
+        if (string.IsNullOrEmpty(jwtKey)) 
+            throw new InvalidOperationException("JWT Key is not configured.");
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 

@@ -3,6 +3,8 @@ using NUnit.Framework;
 using TPI_2026.Application.Abstractions.Interfaces.Repositories;
 using TPI_2026.Application.Exceptions;
 using TPI_2026.Application.Services;
+using TPI_2026.Application.Abstractions.Interfaces.Events;
+using TPI_2026.Domain.Events;
 using TPI_2026.Domain.Entities;
 using TPI_2026.Domain.Enums;
 
@@ -16,6 +18,9 @@ public class AppointmentServiceTests
     private Mock<IRepository<Doctor>> _doctorRepoMock;
     private Mock<IRepository<Room>> _roomRepoMock;
     private Mock<IAppointmentRepository> _appointmentRepoMock;
+    private Mock<IEventHandler<AppointmentCreatedEvent>> _createdHandlerMock;
+    private Mock<IEventHandler<AppointmentCanceledEvent>> _canceledHandlerMock;
+    private Mock<IEventHandler<AppointmentChangedEvent>> _changedHandlerMock;
     private AppointmentService _appointmentService;
 
     [SetUp]
@@ -26,6 +31,9 @@ public class AppointmentServiceTests
         _doctorRepoMock = new Mock<IRepository<Doctor>>();
         _roomRepoMock = new Mock<IRepository<Room>>();
         _appointmentRepoMock = new Mock<IAppointmentRepository>();
+        _createdHandlerMock = new Mock<IEventHandler<AppointmentCreatedEvent>>();
+        _canceledHandlerMock = new Mock<IEventHandler<AppointmentCanceledEvent>>();
+        _changedHandlerMock = new Mock<IEventHandler<AppointmentChangedEvent>>();
 
         // Removed _unitOfWorkMock setup
 
@@ -33,7 +41,10 @@ public class AppointmentServiceTests
             _appointmentRepoMock.Object,
             _patientRepoMock.Object,
             _doctorRepoMock.Object,
-            _roomRepoMock.Object
+            _roomRepoMock.Object,
+            _createdHandlerMock.Object,
+            _canceledHandlerMock.Object,
+            _changedHandlerMock.Object
         );
     }
 
