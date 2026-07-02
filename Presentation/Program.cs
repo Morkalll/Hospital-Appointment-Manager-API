@@ -52,7 +52,13 @@ app.UseAuthorization();
 
 
 app.MapOpenApi();
-app.MapScalarApiReference();
+app.MapScalarApiReference(options =>
+{
+    options.Authentication = new Scalar.AspNetCore.ScalarAuthenticationOptions
+    {
+        PreferredSecuritySchemes = new[] { "Bearer" }
+    };
+});
 
 app.MapControllers();
 app.MapGet("/health", () => Results.Ok("Healthy"));
