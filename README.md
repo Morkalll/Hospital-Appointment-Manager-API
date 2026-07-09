@@ -1,10 +1,5 @@
 # Hospital Appointment Management API
 
-## Team Members
-- Smolarz, Darek
-- Di Stasi, Giuliano
-- Boffa, Tomás
-
 ## General Description
 This is an API built in .NET (C#) for managing hospital appointments and medical histories. The project is structured using **Clean Architecture** principles, separating responsibilities into different layers to promote scalability, maintainability, and testability.
 
